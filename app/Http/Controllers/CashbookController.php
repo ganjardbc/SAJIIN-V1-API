@@ -225,7 +225,8 @@ class CashbookController extends Controller
 
             $shop = Shop::where('id', $shop_id)->first();
             // where('cash_date', $date)
-            $current_cashbook = Cashbook::where('status', 'active') 
+            $current_cashbook = Cashbook::where('cash_status', 'open')
+                ->where('status', 'active') 
                 ->where('shop_id', $shop_id)
                 ->orderBy('cash_date', 'desc')
                 ->first();
