@@ -13,6 +13,6 @@
     </style>
 </head>
 <body>
-    <div>Sajiin api version 0.1</div>
+    <div>Sajiin API version 1.0</div>
 </body>
 </html>
