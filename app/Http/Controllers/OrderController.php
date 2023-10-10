@@ -146,9 +146,9 @@ class OrderController extends Controller
                 $cashIn = Order::where($newStatus)
                     ->where('status', '!=', 'canceled')
                     ->sum('total_price');
-                $cashOutOrder = Order::where($newStatus)
-                    ->where('status', '!=', 'canceled')
-                    ->sum('change_price');
+                // $cashOutOrder = Order::where($newStatus)
+                //     ->where('status', '!=', 'canceled')
+                //     ->sum('change_price');
                 
                 // EXPENSE LIST 
                 $expenseList = ExpenseList::where(array_merge($cashbookStatus, ['shop_id' => $shopID]))
@@ -165,7 +165,8 @@ class OrderController extends Controller
                 // COUNTING
                 $cashModal = $cashBook['cash_modal'];
                 $cashActual = $cashBook['cash_actual'];
-                $cashOut = $cashOutOrder + $expenseListTotal;
+                // $cashOut = $cashOutOrder + $expenseListTotal;
+                $cashOut = $expenseListTotal;
                 $cashSummary = ($cashModal + $cashIn) - $cashOut;
                 $cashProfit = $cashSummary - $cashModal;
             }
@@ -207,9 +208,9 @@ class OrderController extends Controller
                 $cashIn = Order::where($newStatus)
                     ->whereIn('cashbook_id', $cashBookIds)
                     ->sum('total_price');
-                $cashOutOrder = Order::where($newStatus)
-                    ->whereIn('cashbook_id', $cashBookIds)
-                    ->sum('change_price');
+                // $cashOutOrder = Order::where($newStatus)
+                //     ->whereIn('cashbook_id', $cashBookIds)
+                //     ->sum('change_price');
                 
                 // EXPENSE LIST
                 $expenseList = ExpenseList::where($newExpenseStatus)
@@ -224,7 +225,8 @@ class OrderController extends Controller
                     ->count('id');
                 
                 // COUNTING
-                $cashOut = $cashOutOrder + $expenseListTotal;
+                // $cashOut = $cashOutOrder + $expenseListTotal;
+                $cashOut = $expenseListTotal;
                 
                 $cashModal = 0;
                 for ($i=0; $i < count($cashBookJson); $i++) { 
@@ -448,9 +450,9 @@ class OrderController extends Controller
             $cashIn = Order::where($newStatus)
                 ->where('status', '!=', 'canceled')
                 ->sum('total_price');
-            $cashOutOrder = Order::where($newStatus)
-                ->where('status', '!=', 'canceled')
-                ->sum('change_price');
+            // $cashOutOrder = Order::where($newStatus)
+            //     ->where('status', '!=', 'canceled')
+            //     ->sum('change_price');
             
             // EXPENSE LIST
             $expenseList = ExpenseList::where(array_merge($cashbookStatus, ['shop_id' => $shopID]))
@@ -465,7 +467,8 @@ class OrderController extends Controller
                 ->count('id');
             
             // COUNTING 
-            $cashOut = $cashOutOrder + $expenseListTotal;
+            // $cashOut = $cashOutOrder + $expenseListTotal;
+            $cashOut = $expenseListTotal;
             $cashModal = $cashBook['cash_modal'];
             $cashActual = $cashBook['cash_actual'];
             $cashSummary = ($cashModal + $cashIn) - $cashOut;
@@ -509,9 +512,9 @@ class OrderController extends Controller
             $cashIn = Order::where($newStatus)
                 ->whereIn('cashbook_id', $cashBookIds)
                 ->sum('total_price');
-            $cashOutOrder = Order::where($newStatus)
-                ->whereIn('cashbook_id', $cashBookIds)
-                ->sum('change_price');
+            // $cashOutOrder = Order::where($newStatus)
+            //     ->whereIn('cashbook_id', $cashBookIds)
+            //     ->sum('change_price');
             
             // EXPENSE LIST
             $expenseList = ExpenseList::where($newExpenseStatus)
@@ -526,7 +529,8 @@ class OrderController extends Controller
                 ->count('id');
 
             // COUNTING 
-            $cashOut = $cashOutOrder + $expenseListTotal;
+            // $cashOut = $cashOutOrder + $expenseListTotal;
+            $cashOut = $expenseListTotal;
                 
             $cashModal = 0;
             for ($i=0; $i < count($cashBookJson); $i++) { 

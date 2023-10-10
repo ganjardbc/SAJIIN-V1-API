@@ -209,23 +209,23 @@
 				</tr>
                 @endforeach 
 
-                <tr>
+                <!-- <tr>
                     <td colspan="4">
                         <div style="text-align: left; font-weight: normal; font-size: 13px;">Total Pengeluaran</div>
                     </td>
                     <td>
                         <div style="text-align: right; font-weight: normal; font-size: 13px;">Rp {{ number_format($response['expense_list_total'], 0) }}</div>
                     </td>
-                </tr>
+                </tr> -->
 
-                <tr>
+                <!-- <tr>
                     <td colspan="4">
                         <div style="text-align: left; font-weight: normal; font-size: 13px;">Kembalian Penjualan</div>
                     </td>
                     <td>
                         <div style="text-align: right; font-weight: normal; font-size: 13px;">Rp {{ number_format($response['grand_change'], 0) }}</div>
                     </td>
-                </tr>
+                </tr> -->
 
                 <tr>
                     <td colspan="4">

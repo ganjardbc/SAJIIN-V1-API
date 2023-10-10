@@ -101,16 +101,17 @@ class CashbookController extends Controller
                         ->where('payment_status', true)
                         ->where('status', '!=', 'canceled')
                         ->sum('total_price');
-                    $cash_out_order = Order::where('shop_id', $req['shop_id'])
-                        ->where('cashbook_id', $cashbook['id'])
-                        ->where('payment_status', true)
-                        ->where('status', '!=', 'canceled')
-                        ->sum('change_price');
+                    // $cash_out_order = Order::where('shop_id', $req['shop_id'])
+                    //     ->where('cashbook_id', $cashbook['id'])
+                    //     ->where('payment_status', true)
+                    //     ->where('status', '!=', 'canceled')
+                    //     ->sum('change_price');
                     $cash_expense = ExpenseList::where('shop_id', $req['shop_id'])
                         ->where('cashbook_id', $cashbook['id'])
                         ->where('status', 'active')
                         ->sum('expense_price');
-                    $cash_out = $cash_out_order + $cash_expense;
+                    // $cash_out = $cash_out_order + $cash_expense;
+                    $cash_out = $cash_expense;
                     $cash_modal = $cashbook['cash_modal'];
                     $cash_summary = ($cash_modal + $cash_in) - $cash_out;
                     $cash_profit = $cash_summary - $cash_modal;
@@ -273,16 +274,17 @@ class CashbookController extends Controller
                     ->where('payment_status', true)
                     ->where('status', '!=', 'canceled')
                     ->sum('total_price');
-                $cash_out_order = Order::where('shop_id', $shop_id)
-                    ->where('cashbook_id', $current_cashbook['id'])
-                    ->where('payment_status', true)
-                    ->where('status', '!=', 'canceled')
-                    ->sum('change_price');
+                // $cash_out_order = Order::where('shop_id', $shop_id)
+                //     ->where('cashbook_id', $current_cashbook['id'])
+                //     ->where('payment_status', true)
+                //     ->where('status', '!=', 'canceled')
+                //     ->sum('change_price');
                 $cash_expense = ExpenseList::where('shop_id', $shop_id)
                     ->where('cashbook_id', $current_cashbook['id'])
                     ->where('status', 'active')
                     ->sum('expense_price');
-                $cash_out = $cash_out_order + $cash_expense;
+                // $cash_out = $cash_out_order + $cash_expense;
+                $cash_out = $cash_expense;
                 $cash_modal = $current_cashbook['cash_modal'];
                 $cash_summary = ($cash_modal + $cash_in) - $cash_out;
                 $cash_profit = $cash_summary - $cash_modal;
