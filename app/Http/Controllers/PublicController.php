@@ -288,7 +288,6 @@ class PublicController extends Controller
         $validator = Validator::make($req->all(), [
             'limit' => 'required|integer',
             'offset' => 'required|integer',
-            'status' => 'string',
             'shop_id' => 'integer'
         ]);
 
@@ -458,6 +457,10 @@ class PublicController extends Controller
             if ($order) 
             {
                 $dataOrder = Order::where(['order_id' => $payloadOrder['order_id']])->first();
+
+                if ($dataOrder->table_id) {
+                    Table::where(['id' => $dataOrder->table_id])->update(['status' => 'inactive']);
+                }
 
                 $newPayloadItems = [];
                 $payloadItems = $req['details'];

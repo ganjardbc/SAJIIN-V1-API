@@ -1013,35 +1013,9 @@ class OrderController extends Controller
             {
                 $dataOrder = Order::where(['order_id' => $payloadOrder['order_id']])->first();
 
-                // hidden temporary
-                // post cash book
-                // $paymentStatus = $dataOrder['payment_status'];
-                // $cashbookId = $dataOrder['cashbook_id'];
-                // $cashBook = Cashbook::where(['id' => $cashbookId])->first();
-                // if ($paymentStatus && $cashBook) 
-                // {
-                //     $totalItem = (int)$dataOrder['total_item'];
-                //     $billsPrice = (int)$dataOrder['bills_price'];
-                //     $changePrice = (int)$dataOrder['change_price'];
-
-                //     $cashIn = $cashBook['cash_in'] + $billsPrice;
-                //     $cashOut = $cashBook['cash_out'] + $changePrice;
-                //     $cashSummary = ($cashBook['cash_modal'] + $cashIn) - $cashOut;
-                //     $totalOrder = $cashBook['total_order'] + 1;
-                //     $totalItem = $cashBook['total_item'] + (int)$dataOrder['total_item'];
-
-                //     $payload = [
-                //         'cash_summary' => $cashSummary,
-                //         'cash_in' => $cashIn,
-                //         'cash_out' => $cashOut,
-                //         'total_order' => $totalOrder,
-                //         'total_item' => $totalItem,
-                //         'updated_by' => Auth()->user()->id,
-                //         'updated_at' => date('Y-m-d H:i:s')
-                //     ];
-        
-                //     Cashbook::where(['id' => $cashbookId])->update($payload);
-                // }
+                if ($dataOrder->table_id) {
+                    Table::where(['id' => $dataOrder->table_id])->update(['status' => 'inactive']);
+                }
 
                 $newPayloadItems = [];
                 $payloadItems = $req['details'];
@@ -1137,11 +1111,10 @@ class OrderController extends Controller
             if ($order) 
             {
                 $dataOrder = Order::where(['order_id' => $payloadOrder['order_id']])->first();
-                // $payloadTable = $dataOrder->table_id;
 
-                // if ($payloadTable) {
-                //     Table::where(['id' => $payloadTable])->update(['status' => 'inactive']);
-                // }
+                if ($dataOrder->table_id) {
+                    Table::where(['id' => $dataOrder->table_id])->update(['status' => 'inactive']);
+                }
 
                 $newPayloadItems = [];
                 $payloadItems = $req['details'];
@@ -1508,64 +1481,7 @@ class OrderController extends Controller
         } 
         else 
         {
-            // hidden temporary
-            // update cash book
-            // $dataOrder = Order::where(['order_id' => $req['order_id']])->first();
-            
-            // $prevPaymentStatus = $dataOrder['payment_status'];
-            // $cashbookId = $dataOrder['cashbook_id'];
-            // $cashBook = Cashbook::where(['id' => $cashbookId])->first();
-            // if ($cashBook) 
-            // {
-            //     $paymentStatus = $req['payment_status'];
-            //     $orderStatus = $req['status'];
-            //     $totalItem = (int)$req['total_item'];
-            //     $billsPrice = (int)$req['bills_price'];
-            //     $changePrice = (int)$req['change_price'];
-
-            //     $cashIn = $cashBook['cash_in'];
-            //     $cashOut = $cashBook['cash_out'];
-            //     $cashSummary = $cashBook['cash_summary'];
-            //     $totalOrder = $cashBook['total_order'];
-            //     $totalItem = $cashBook['total_item'];
-
-            //     if ($orderStatus == 'canceled')
-            //     {
-            //         if ($paymentStatus) {
-            //             $cashIn = $cashBook['cash_in'] - $billsPrice;
-            //             $cashOut = $cashBook['cash_out'] - $changePrice;
-            //             $cashSummary = ($cashBook['cash_modal'] + $cashIn) - $cashOut;
-            //             $totalOrder = $cashBook['total_order'] - 1;
-            //             $totalItem = $cashBook['total_item'] - (int)$req['total_item'];
-            //         }
-            //     } else 
-            //     {
-            //         if (
-            //             $orderStatus == 'on-progress' ||
-            //             $orderStatus == 'done'
-            //         ) {
-            //             if ($prevPaymentStatus != $paymentStatus) {
-            //                 $cashIn = $cashBook['cash_in'] + $billsPrice;
-            //                 $cashOut = $cashBook['cash_out'] + $changePrice;
-            //                 $cashSummary = ($cashBook['cash_modal'] + $cashIn) - $cashOut;
-            //                 $totalOrder = $cashBook['total_order'] + 1;
-            //                 $totalItem = $cashBook['total_item'] + (int)$req['total_item'];
-            //             }
-            //         }
-            //     }
-
-            //     $payload = [
-            //         'cash_summary' => $cashSummary,
-            //         'cash_in' => $cashIn,
-            //         'cash_out' => $cashOut,
-            //         'total_order' => $totalOrder,
-            //         'total_item' => $totalItem,
-            //         'updated_by' => Auth()->user()->id,
-            //         'updated_at' => date('Y-m-d H:i:s')
-            //     ];
-        
-            //     Cashbook::where(['id' => $cashbookId])->update($payload);
-            // }
+            $dataOldOrder = Order::where(['order_id' => $req['order_id']])->first();
 
             $payload = [
                 'delivery_fee' => $req['delivery_fee'],
@@ -1600,11 +1516,42 @@ class OrderController extends Controller
 
             if ($data)
             {
+                $dataNewOrder = Order::where(['order_id' => $req['order_id']])->first();
+
+                // CHANGE FROM OLD TABLE NEW TABLE
+                if ($dataOldOrder->table_id !== $dataNewOrder->table_id) 
+                {
+                    if ($dataOldOrder->table_id)
+                    {
+                        Table::where(['id' => $dataOldOrder->table_id])->update(['status' => 'active']);
+                    }
+                    if ($dataNewOrder->table_id)
+                    {
+                        Table::where(['id' => $dataNewOrder->table_id])->update(['status' => 'inactive']);
+                    }
+                }
+
+                // CHANGE CURRENT TABLE STATUS
+                if ($dataOldOrder->table_id === $dataNewOrder->table_id) 
+                {
+                    $statusTable = 'inactive';
+
+                    if (
+                        $dataNewOrder->status === 'done' || 
+                        $dataNewOrder->status === 'canceled'
+                    ) {
+                        $statusTable = 'active';
+                    }
+
+                    Table::where(['id' => $dataNewOrder->table_id])->update(['status' => $statusTable]);
+                }
+
+
                 $response = [
                     'message' => 'proceed success',
                     'status' => 'ok',
                     'code' => '201',
-                    'data' => Order::where(['order_id' => $req['order_id']])->first()
+                    'data' => $dataNewOrder
                 ];
             }
             else 
