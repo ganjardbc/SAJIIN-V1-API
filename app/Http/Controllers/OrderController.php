@@ -336,7 +336,7 @@ class OrderController extends Controller
             $shipment = Shipment::where(['id' => $dump['shipment_id']])->first();
             $payment = Payment::where(['id' => $dump['payment_id']])->first();
             $shop = Shop::where(['id' => $dump['shop_id']])->first();
-            $qrUrl = 'https://shop.sajiin-app-v1.my.id/visitor/'.$shop['shop_id'].'/order/'.$dump['order_id'];
+            $qrUrl = 'https://shop.sajiin.com/visitor/'.$shop['shop_id'].'/order/'.$dump['order_id'];
             $qrcode = base64_encode(
                 QrCode::format('svg')
                     ->size(120)
