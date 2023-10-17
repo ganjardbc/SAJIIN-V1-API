@@ -902,6 +902,7 @@ class OrderController extends Controller
                 'all_order' => Order::where(['shop_id' => $shID])->count(),
                 'new_order' => Order::GetCountByShopStatusID($shID, 'new-order'),
                 'on_progress' => Order::GetCountByShopStatusID($shID, 'on-progress'),
+                'ready' => Order::GetCountByShopStatusID($shID, 'ready'),
                 'done' => Order::GetCountByShopStatusID($shID, 'done'),
                 'canceled' => Order::GetCountByShopStatusID($shID, 'canceled')
             ];
@@ -1517,6 +1518,11 @@ class OrderController extends Controller
             if ($data)
             {
                 $dataNewOrder = Order::where(['order_id' => $req['order_id']])->first();
+
+                // UPDATE ORDER ITEM WHEN STATUS READY
+                if ($dataNewOrder->status === 'ready') {
+                    OrderItem::where('order_id', $dataNewOrder->id)->update(['status' => 'done']);
+                }
 
                 // CHANGE FROM OLD TABLE NEW TABLE
                 if ($dataOldOrder->table_id !== $dataNewOrder->table_id) 
