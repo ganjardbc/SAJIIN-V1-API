@@ -903,6 +903,7 @@ class OrderController extends Controller
                 'new_order' => Order::GetCountByShopStatusID($shID, 'new-order'),
                 'on_progress' => Order::GetCountByShopStatusID($shID, 'on-progress'),
                 'ready' => Order::GetCountByShopStatusID($shID, 'ready'),
+                'delivered' => Order::GetCountByShopStatusID($shID, 'delivered'),
                 'done' => Order::GetCountByShopStatusID($shID, 'done'),
                 'canceled' => Order::GetCountByShopStatusID($shID, 'canceled')
             ];

@@ -157,7 +157,7 @@ class UserController extends Controller
     public function removeImage(Request $req) 
     {
         $validator = Validator::make($req->all(), [
-            'id' => 'required|integer|min:0|max:17',
+            'id' => 'required|integer|min:0',
         ]);
         
         $response = [];
@@ -208,7 +208,7 @@ class UserController extends Controller
     public function uploadImage(Request $req) 
     {
         $validator = Validator::make($req->all(), [
-            'id' => 'required|integer|min:0|max:17',
+            'id' => 'required|integer|min:0',
             'image' => 'image|mimes:jpeg,png,jpg,gif,svg|max:1000000'
         ]);
 
