@@ -315,7 +315,7 @@ class UserController extends Controller
                 'name' => $req['name'],
                 'email' => $req['email'],
                 'password' => Hash::make($req['password']),
-                'username' => explode('@', $req['email'])[0],
+                'username' => $req['username'],
                 'provider' => $req['provider'],
                 'status' => $req['status'],
                 'enabled' => $req['enabled'],
