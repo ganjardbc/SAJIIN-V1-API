@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Validator;
 use App\ExpenseList;
 use App\ExpenseType;
 use App\Cashbook;
+use App\Payment;
 use App\Shop;
 use Image;
 
@@ -78,10 +79,11 @@ class ExpenseListController extends Controller
                 $dump = json_decode($data, true);
 
                 for ($i=0; $i < count($dump); $i++) { 
-                    $product = $dump[$i];
-                    $product['expense_type'] = ExpenseType::where(['id' => $dump[$i]['expense_type_id']])->first();
-                    $product['cashbook'] = Cashbook::where(['id' => $dump[$i]['cashbook_id']])->first();
-                    array_push($newPayload, $product);
+                    $expenseList = $dump[$i];
+                    $expenseList['expense_type'] = ExpenseType::where(['id' => $dump[$i]['expense_type_id']])->first();
+                    $expenseList['cashbook'] = Cashbook::where(['id' => $dump[$i]['cashbook_id']])->first();
+                    $expenseList['payment'] = Payment::where(['id' => $dump[$i]['payment_id']])->first();
+                    array_push($newPayload, $expenseList);
                 }
 
                 $response = [
@@ -296,7 +298,8 @@ class ExpenseListController extends Controller
             'status' => 'required|string',
             'shop_id' => 'required',
             'cashbook_id' => 'required',
-            'expense_type_id' => 'required'
+            'expense_type_id' => 'required',
+            'payment_id' => 'required',
         ]);
 
         $response = [];
@@ -321,6 +324,7 @@ class ExpenseListController extends Controller
                 'shop_id' => $req['shop_id'],
                 'cashbook_id' => $req['cashbook_id'],
                 'expense_type_id' => $req['expense_type_id'],
+                'payment_id' => $req['payment_id'],
                 'created_by' => Auth()->user()->id,
                 'created_at' => date('Y-m-d H:i:s')
             ];
@@ -359,7 +363,8 @@ class ExpenseListController extends Controller
             'status' => 'required|string',
             'shop_id' => 'required',
             'cashbook_id' => 'required',
-            'expense_type_id' => 'required'
+            'expense_type_id' => 'required',
+            'payment_id' => 'required',
         ]);
 
         $response = [];
@@ -383,6 +388,7 @@ class ExpenseListController extends Controller
                 'shop_id' => $req['shop_id'],
                 'cashbook_id' => $req['cashbook_id'],
                 'expense_type_id' => $req['expense_type_id'],
+                'payment_id' => $req['payment_id'],
                 'updated_by' => Auth()->user()->id,
                 'updated_at' => date('Y-m-d H:i:s')
             ];
