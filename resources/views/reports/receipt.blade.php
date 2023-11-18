@@ -116,14 +116,16 @@
 </head>
 <body>
     <div id="container">
-        <div class="space">
-            <div class="image">
-                <img 
-                    src="{{ public_path('contents/shops/thumbnails/'.$response['data']['shop']['image']) }}" 
-                    alt="" 
-                    style="height: 50px;">
+        @if($response['data']['shop']['image'])
+            <div class="space">
+                <div class="image">
+                    <img 
+                        src="{{ public_path('contents/shops/thumbnails/'.$response['data']['shop']['image']) }}" 
+                        alt="" 
+                        style="height: 50px;">
+                </div>
             </div>
-        </div>
+        @endif 
 
         <div class="space">
             <h1 class="text-logo-header">{{ $response['data']['shop']['name'] }}</h1>

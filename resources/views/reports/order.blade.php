@@ -72,7 +72,9 @@
                         Periode: {{ date_format(date_create($response['range_date'][0]), 'd M Y') }} - {{ date_format(date_create($response['range_date'][1]), 'd M Y') }}
                     </td>
                     <td style="width: 50%; text-align: right;">
-                        <img src="{{ public_path('contents/shops/thumbnails/'.$response['shop']['image']) }}" alt="" style="height: 50px;">
+                        @if($response['shop']['image'])
+                            <img src="{{ public_path('contents/shops/thumbnails/'.$response['shop']['image']) }}" alt="" style="height: 50px;">
+                        @endif 
                     </td>
                 </tr>
             </table>
