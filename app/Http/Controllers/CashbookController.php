@@ -8,6 +8,7 @@ use App\Cashbook;
 use App\Shop;
 use App\Order;
 use App\ExpenseList;
+use App\Payment;
 use Image;
 use Carbon\Carbon;
 
@@ -101,16 +102,10 @@ class CashbookController extends Controller
                         ->where('payment_status', true)
                         ->where('status', '!=', 'canceled')
                         ->sum('total_price');
-                    // $cash_out_order = Order::where('shop_id', $req['shop_id'])
-                    //     ->where('cashbook_id', $cashbook['id'])
-                    //     ->where('payment_status', true)
-                    //     ->where('status', '!=', 'canceled')
-                    //     ->sum('change_price');
                     $cash_expense = ExpenseList::where('shop_id', $req['shop_id'])
                         ->where('cashbook_id', $cashbook['id'])
                         ->where('status', 'active')
                         ->sum('expense_price');
-                    // $cash_out = $cash_out_order + $cash_expense;
                     $cash_out = $cash_expense;
                     $cash_modal = $cashbook['cash_modal'];
                     $cash_summary = ($cash_modal + $cash_in) - $cash_out;
@@ -119,6 +114,33 @@ class CashbookController extends Controller
                     $cashbook['cash_in'] = (int)$cash_in;
                     $cashbook['cash_out'] = (int)$cash_out;
                     $cashbook['cash_profit'] = (int)$cash_profit;
+
+                    // cash detail
+                    $cash_detail = Payment::where('status', 'active')->get();
+                    $cash_detail_payload = array();
+                    $cash_dump = json_decode($cash_detail, true);
+                    for ($j=0; $j < count($cash_dump); $j++) { 
+                        $cash_detail_in = Order::where('shop_id', $req['shop_id'])
+                            ->where('cashbook_id', $cashbook['id'])
+                            ->where('payment_id', $cash_dump[$j]['id'])
+                            ->where('payment_status', true)
+                            ->where('status', '!=', 'canceled')
+                            ->sum('total_price');
+                        $cash_detail_out = ExpenseList::where('shop_id', $req['shop_id'])
+                            ->where('cashbook_id', $cashbook['id'])
+                            ->where('payment_id', $cash_dump[$j]['id'])
+                            ->where('status', 'active')
+                            ->sum('expense_price');
+                        $dump_payload = [
+                            'payment_id' => $cash_dump[$j]['payment_id'],
+                            'image' => $cash_dump[$j]['image'],
+                            'name' => $cash_dump[$j]['name'],
+                            'cash_in' => (int)$cash_detail_in,
+                            'cash_out' => (int)$cash_detail_out,
+                        ];
+                        array_push($cash_detail_payload, $dump_payload);
+                    }
+                    $cashbook['cash_detail'] = $cash_detail_payload;
 
                     $payload = [
                         'cashbook' => $cashbook,
@@ -225,13 +247,11 @@ class CashbookController extends Controller
             $shop_id = $req['shop_id'];
 
             $shop = Shop::where('id', $shop_id)->first();
-            // where('cash_date', $date)
             $current_cashbook = Cashbook::where('cash_status', 'open')
                 ->where('status', 'active') 
                 ->where('shop_id', $shop_id)
                 ->orderBy('cash_date', 'desc')
                 ->first();
-            // where('cash_date', '!=', $date)
             $opened_cashbok = Cashbook::where('cash_status', 'open')
                 ->where('status', 'active')
                 ->where('shop_id', $shop_id)
@@ -274,16 +294,10 @@ class CashbookController extends Controller
                     ->where('payment_status', true)
                     ->where('status', '!=', 'canceled')
                     ->sum('total_price');
-                // $cash_out_order = Order::where('shop_id', $shop_id)
-                //     ->where('cashbook_id', $current_cashbook['id'])
-                //     ->where('payment_status', true)
-                //     ->where('status', '!=', 'canceled')
-                //     ->sum('change_price');
                 $cash_expense = ExpenseList::where('shop_id', $shop_id)
                     ->where('cashbook_id', $current_cashbook['id'])
                     ->where('status', 'active')
                     ->sum('expense_price');
-                // $cash_out = $cash_out_order + $cash_expense;
                 $cash_out = $cash_expense;
                 $cash_modal = $current_cashbook['cash_modal'];
                 $cash_summary = ($cash_modal + $cash_in) - $cash_out;
@@ -292,6 +306,33 @@ class CashbookController extends Controller
                 $current_cashbook['cash_in'] = (int)$cash_in;
                 $current_cashbook['cash_out'] = (int)$cash_out;
                 $current_cashbook['cash_profit'] = (int)$cash_profit;
+
+                // cash detail
+                $cash_detail = Payment::where('status', 'active')->get();
+                $cash_detail_payload = array();
+                $cash_dump = json_decode($cash_detail, true);
+                for ($i=0; $i < count($cash_dump); $i++) { 
+                    $cash_detail_in = Order::where('shop_id', $shop_id)
+                        ->where('cashbook_id', $current_cashbook['id'])
+                        ->where('payment_id', $cash_dump[$i]['id'])
+                        ->where('payment_status', true)
+                        ->where('status', '!=', 'canceled')
+                        ->sum('total_price');
+                    $cash_detail_out = ExpenseList::where('shop_id', $req['shop_id'])
+                        ->where('cashbook_id', $current_cashbook['id'])
+                        ->where('payment_id', $cash_dump[$i]['id'])
+                        ->where('status', 'active')
+                        ->sum('expense_price');
+                    $dump_payload = [
+                        'payment_id' => $cash_dump[$i]['payment_id'],
+                        'image' => $cash_dump[$i]['image'],
+                        'name' => $cash_dump[$i]['name'],
+                        'cash_in' => (int)$cash_detail_in,
+                        'cash_out' => (int)$cash_detail_out,
+                    ];
+                    array_push($cash_detail_payload, $dump_payload);
+                }
+                $current_cashbook['cash_detail'] = $cash_detail_payload;
             }
 
             $payload = [
