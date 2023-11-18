@@ -257,10 +257,6 @@ class CashbookController extends Controller
                 ->where('shop_id', $shop_id)
                 ->orderBy('cash_date', 'desc')
                 ->get();
-            $all_cashbok = Cashbook::where('status', 'active')
-                ->where('shop_id', $shop_id)
-                ->orderBy('cash_date', 'desc')
-                ->get();
             
             // order
             $order_progress = 0;
@@ -338,7 +334,6 @@ class CashbookController extends Controller
             $payload = [
                 'current_cashbook' => $current_cashbook,
                 'opened_cashbook' => $opened_cashbok,
-                'all_cashbook' => $all_cashbok,
                 'shop' => $shop,
             ];
 
