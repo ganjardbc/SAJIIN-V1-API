@@ -122,9 +122,7 @@ class OrderController extends Controller
             $newStatus = array_merge($status, $paymentStatus, $cashbookStatus, ['shop_id' => $shopID]);
             if ($req['cashbook_id']) 
             {
-                $cashBook = Cashbook::where('id', $req['cashbook_id'])
-                    ->where('status', 'active') 
-                    ->first();
+                $cashBook = Cashbook::where('id', $req['cashbook_id'])->first();
                 
                 // ORDER LSIT 
                 $orderList = Order::where($newStatus)
@@ -278,11 +276,13 @@ class OrderController extends Controller
                 for ($i=0; $i < count($dump); $i++) { 
                     $expense = $dump[$i];
                     $type = ExpenseType::where(['id' => $dump[$i]['expense_type_id']])->first();
+                    $payment = Payment::where(['id' => $dump[$i]['payment_id']])->first();
                     $shop = Shop::where(['id' => $dump[$i]['shop_id']])->first();
 
                     $payload = [
                         'expense' => $expense,
                         'type' => $type,
+                        'payment' => $payment,
                         'shop' => $shop
                     ];
 
