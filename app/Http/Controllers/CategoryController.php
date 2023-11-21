@@ -17,75 +17,132 @@ class CategoryController extends Controller
 
     public function getAll(Request $req)
     {
-        $validator = Validator::make($req->all(), [
-            'limit' => 'required|integer',
-            'offset' => 'required|integer'
-        ]);
-
         $response = [];
+        $search = $req['search'];
+        $limit = $req['limit'];
+        $offset = $req['offset'];
+        $status = $req['status'] ? ['status' => $req['status']] : [];
+        $newStatus = array_merge(
+            $status,
+            ['shop_id' => $req['shop_id']]
+        );
+        $totalRecord = 0;
 
-        if ($validator->fails()) 
+        $base = Category::where($newStatus)
+            ->where(function ($query) use ($search) {
+                $query->where('category_id', 'LIKE', '%'.$search.'%')
+                    ->orWhere('name', 'LIKE', '%'.$search.'%')
+                    ->orWhere('description', 'LIKE', '%'.$search.'%');
+            })
+            ->orderBy('id', 'desc');
+        if ($limit && $offset) 
+        {
+            $data = $base->limit($limit)->offset($offset)->get();
+        }
+        else 
+        {
+            $data = $base->get();
+        }
+        $totalRecord = Category::where($newStatus)
+            ->where(function ($query) use ($search) {
+                $query->where('category_id', 'LIKE', '%'.$search.'%')
+                    ->orWhere('name', 'LIKE', '%'.$search.'%')
+                    ->orWhere('description', 'LIKE', '%'.$search.'%');
+            })
+            ->count();
+
+        if ($data) 
         {
             $response = [
-                'message' => $validator->errors(),
-                'status' => 'invalide',
+                'message' => 'proceed success',
+                'status' => 'ok',
                 'code' => '201',
-                'data' => []
+                'data' => $data,
+                'total_record' => $totalRecord
             ];
         } 
         else 
         {
-            $search = $req['search'];
-            $limit = $req['limit'];
-            $offset = $req['offset'];
-            $status = $req['status'] ? ['status' => $req['status']] : [];
-            $newStatus = array_merge(
-                $status,
-                ['shop_id' => $req['shop_id']]
-            );
-            $totalRecord = 0;
-
-            $data = Category::where($newStatus)
-                ->where(function ($query) use ($search) {
-                    $query->where('category_id', 'LIKE', '%'.$search.'%')
-                        ->orWhere('name', 'LIKE', '%'.$search.'%')
-                        ->orWhere('description', 'LIKE', '%'.$search.'%');
-                })
-                ->limit($limit)
-                ->offset($offset)
-                ->orderBy('id', 'desc')
-                ->get();
-            $totalRecord = Category::where($newStatus)
-                ->where(function ($query) use ($search) {
-                    $query->where('category_id', 'LIKE', '%'.$search.'%')
-                        ->orWhere('name', 'LIKE', '%'.$search.'%')
-                        ->orWhere('description', 'LIKE', '%'.$search.'%');
-                })
-                ->count();
-
-            if ($data) 
-            {
-                $response = [
-                    'message' => 'proceed success',
-                    'status' => 'ok',
-                    'code' => '201',
-                    'data' => $data,
-                    'total_record' => $totalRecord
-                ];
-            } 
-            else 
-            {
-                $response = [
-                    'message' => 'failed to get datas',
-                    'status' => 'failed',
-                    'code' => '201',
-                    'data' => [],
-                    'total_record' => $totalRecord
-                ];
-            }
+            $response = [
+                'message' => 'failed to get datas',
+                'status' => 'failed',
+                'code' => '201',
+                'data' => [],
+                'total_record' => $totalRecord
+            ];
         }
 
         return response()->json($response, 200);
+
+        // $validator = Validator::make($req->all(), [
+        //     'limit' => 'required|integer',
+        //     'offset' => 'required|integer'
+        // ]);
+
+        // $response = [];
+
+        // if ($validator->fails()) 
+        // {
+        //     $response = [
+        //         'message' => $validator->errors(),
+        //         'status' => 'invalide',
+        //         'code' => '201',
+        //         'data' => []
+        //     ];
+        // } 
+        // else 
+        // {
+        //     $search = $req['search'];
+        //     $limit = $req['limit'];
+        //     $offset = $req['offset'];
+        //     $status = $req['status'] ? ['status' => $req['status']] : [];
+        //     $newStatus = array_merge(
+        //         $status,
+        //         ['shop_id' => $req['shop_id']]
+        //     );
+        //     $totalRecord = 0;
+
+        //     $data = Category::where($newStatus)
+        //         ->where(function ($query) use ($search) {
+        //             $query->where('category_id', 'LIKE', '%'.$search.'%')
+        //                 ->orWhere('name', 'LIKE', '%'.$search.'%')
+        //                 ->orWhere('description', 'LIKE', '%'.$search.'%');
+        //         })
+        //         ->limit($limit)
+        //         ->offset($offset)
+        //         ->orderBy('id', 'desc')
+        //         ->get();
+        //     $totalRecord = Category::where($newStatus)
+        //         ->where(function ($query) use ($search) {
+        //             $query->where('category_id', 'LIKE', '%'.$search.'%')
+        //                 ->orWhere('name', 'LIKE', '%'.$search.'%')
+        //                 ->orWhere('description', 'LIKE', '%'.$search.'%');
+        //         })
+        //         ->count();
+
+        //     if ($data) 
+        //     {
+        //         $response = [
+        //             'message' => 'proceed success',
+        //             'status' => 'ok',
+        //             'code' => '201',
+        //             'data' => $data,
+        //             'total_record' => $totalRecord
+        //         ];
+        //     } 
+        //     else 
+        //     {
+        //         $response = [
+        //             'message' => 'failed to get datas',
+        //             'status' => 'failed',
+        //             'code' => '201',
+        //             'data' => [],
+        //             'total_record' => $totalRecord
+        //         ];
+        //     }
+        // }
+
+        // return response()->json($response, 200);
     }
 
     public function getByID(Request $req)
@@ -273,7 +330,6 @@ class CategoryController extends Controller
         $validator = Validator::make($req->all(), [
             'category_id' => 'required|string|min:0|max:17|unique:categories',
             'name' => 'required|string',
-            'description' => 'required|string',
             'status' => 'required|string',
             'shop_id' => 'required'
         ]);
@@ -331,7 +387,6 @@ class CategoryController extends Controller
         $validator = Validator::make($req->all(), [
             'category_id' => 'required|string|min:0|max:17',
             'name' => 'required|string',
-            'description' => 'required|string',
             'status' => 'required|string'
         ]);
 

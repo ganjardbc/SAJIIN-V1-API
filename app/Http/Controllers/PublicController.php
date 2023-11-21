@@ -84,8 +84,6 @@ class PublicController extends Controller
     public function category(Request $req)
     {
         $validator = Validator::make($req->all(), [
-            'limit' => 'required|integer',
-            'offset' => 'required|integer',
             'shop_id' => 'required|integer'
         ]);
 
@@ -112,7 +110,17 @@ class PublicController extends Controller
             );
             $totalRecord = 0;
 
-            $data = Category::where($newStt)->limit($limit)->offset($offset)->orderBy('id', 'desc')->get();
+            $base = Category::where($newStt)->orderBy('id', 'desc');
+
+            if ($limit && $offset)
+            {
+                $data = $base->limit($limit)->offset($offset)->get();
+            }
+            else 
+            {
+                $data = $base->get();
+            }
+            
             $totalRecord = Category::where($newStt)->count();
 
             if ($data) 
