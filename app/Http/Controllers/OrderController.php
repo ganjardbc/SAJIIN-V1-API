@@ -22,6 +22,7 @@ use App\Cashbook;
 use App\Platform;
 use App\ExpenseList;
 use App\ExpenseType;
+use App\Notification;
 use Carbon\Carbon;
 
 
@@ -1553,6 +1554,47 @@ class OrderController extends Controller
                     Table::where(['id' => $dataNewOrder->table_id])->update(['status' => $statusTable]);
                 }
 
+                // SEND NOTIFICATION
+                $default = 'Pesanan';
+                $orderStatus = ' berubah';
+                if ($dataNewOrder['status'] === 'new-order') {
+                    $orderStatus = ' diterima toko';
+                }
+                if ($dataNewOrder['status'] === 'on-progress') {
+                    $orderStatus = ' sedang disiapkan';
+                }
+                if ($dataNewOrder['status'] === 'ready') {
+                    $orderStatus = ' sedang diantarkan';
+                }
+                if ($dataNewOrder['status'] === 'delivered') {
+                    $orderStatus = ' diterima pelanggan';
+                }
+                if ($dataNewOrder['status'] === 'done') {
+                    $orderStatus = ' sudah selesai';
+                }
+                if ($dataNewOrder['status'] === 'canceled') {
+                    $orderStatus = ' dibatalkan';
+                }
+                if ($dataNewOrder['customer_name']) {
+                    $messageCustomer = $default . ' dari ' . $dataNewOrder['customer_name'];
+                    $message = $messageCustomer . $orderStatus;
+                } else {
+                    $message = $default . $dataNewOrder['order_id'] . $orderStatus;
+                }
+
+                $payload = [
+                    'notification_id' => 'NF-' . date_create()->getTimestamp(),
+                    'message' => $message,
+                    'target' => $dataNewOrder['order_id'],
+                    'type' => 'order',
+                    'status' => 'active',
+                    'is_read' => 0,
+                    'shop_id' => $dataNewOrder['shop_id'],
+                    'created_by' => $dataNewOrder['shop_id'],
+                    'created_at' => date('Y-m-d H:i:s')
+                ];
+    
+                Notification::insert($payload);
 
                 $response = [
                     'message' => 'proceed success',
