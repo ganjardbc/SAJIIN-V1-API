@@ -1576,7 +1576,7 @@ class OrderController extends Controller
                     $orderStatus = ' dibatalkan';
                 }
                 if ($dataNewOrder['customer_name']) {
-                    $messageCustomer = $default . ' dari ' . $dataNewOrder['customer_name'];
+                    $messageCustomer = $default . ' atas nama ' . $dataNewOrder['customer_name'];
                     $message = $messageCustomer . $orderStatus;
                 } else {
                     $message = $default . $dataNewOrder['order_id'] . $orderStatus;
@@ -1586,7 +1586,7 @@ class OrderController extends Controller
                     'notification_id' => 'NF-' . date_create()->getTimestamp(),
                     'message' => $message,
                     'target' => $dataNewOrder['order_id'],
-                    'type' => 'order',
+                    'type' => 'order-status',
                     'status' => 'active',
                     'is_read' => 0,
                     'shop_id' => $dataNewOrder['shop_id'],

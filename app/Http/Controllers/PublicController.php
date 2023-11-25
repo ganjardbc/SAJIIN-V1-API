@@ -523,12 +523,12 @@ class PublicController extends Controller
                 }
 
                 // SEND NOTIFICATION 
-                $default = 'Kamu punya pesanan baru';
+                $default = 'Pesanan baru';
                 $messageCustomer = '';
                 $message = $default;
                 
                 if ($dataOrder['customer_name']) {
-                    $messageCustomer = $default . ' dari ' . $dataOrder['customer_name'];
+                    $messageCustomer = $default . ' atas nama ' . $dataOrder['customer_name'];
                     $message = $messageCustomer;
                 }
 
