@@ -9,6 +9,7 @@ use App\Shop;
 use App\Order;
 use App\ExpenseList;
 use App\Payment;
+use App\Notification;
 use Image;
 use Carbon\Carbon;
 
@@ -395,6 +396,22 @@ class CashbookController extends Controller
 
             if ($data)
             {
+                $message = 'Buku kas berhasil dibuat untuk tanggal ' . $req['cash_date'];
+
+                $payload = [
+                    'notification_id' => 'NF-' . date_create()->getTimestamp(),
+                    'message' => $message,
+                    'target' => $req['cashbook_id'],
+                    'type' => 'cashbook',
+                    'status' => 'active',
+                    'is_read' => 0,
+                    'shop_id' => $req['shop_id'],
+                    'created_by' => $req['shop_id'],
+                    'created_at' => date('Y-m-d H:i:s')
+                ];
+    
+                Notification::insert($payload);
+
                 $response = [
                     'message' => 'proceed success',
                     'status' => 'ok',
@@ -462,6 +479,26 @@ class CashbookController extends Controller
 
             if ($data)
             {
+                $message = 'Buku kas untuk tanggal ' . $req['cash_date'] . ' berhasil diupdate';
+
+                if ($req['cash_status'] == 'closed') {
+                    $message = 'Buku kas untuk tanggal ' . $req['cash_date'] . ' berhasil ditutup';
+                }
+
+                $payload = [
+                    'notification_id' => 'NF-' . date_create()->getTimestamp(),
+                    'message' => $message,
+                    'target' => $req['cashbook_id'],
+                    'type' => 'cashbook',
+                    'status' => 'active',
+                    'is_read' => 0,
+                    'shop_id' => $req['shop_id'],
+                    'created_by' => $req['shop_id'],
+                    'created_at' => date('Y-m-d H:i:s')
+                ];
+    
+                Notification::insert($payload);
+
                 $response = [
                     'message' => 'proceed success',
                     'status' => 'ok',
