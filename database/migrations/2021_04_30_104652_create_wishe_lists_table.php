@@ -18,6 +18,7 @@ class CreateWisheListsTable extends Migration
             $table->unsignedBigInteger('owner_id')->nullable();
             $table->unsignedBigInteger('product_id');
             $table->unsignedBigInteger('user_id');
+            $table->bigInteger('loki_index')->default(0); //yyyymmddhhmmss
             $table->string('created_by')->nullable();
             $table->string('updated_by')->nullable();
             $table->timestamps();

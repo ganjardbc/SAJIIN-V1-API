@@ -19,6 +19,7 @@ class CreateRolesTable extends Migration
             $table->string('role_name');
             $table->string('description')->nullable();
             $table->enum('status', ['active', 'inactive'])->default('inactive');
+            $table->bigInteger('loki_index')->default(0); //yyyymmddhhmmss
             $table->timestamps();
         });
     }

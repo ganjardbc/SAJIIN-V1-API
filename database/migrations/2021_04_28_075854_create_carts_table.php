@@ -30,6 +30,7 @@ class CreateCartsTable extends Migration
             $table->unsignedBigInteger('product_id')->nullable();
             $table->unsignedBigInteger('proddetail_id')->nullable();
             $table->unsignedBigInteger('toping_id')->nullable();
+            $table->bigInteger('loki_index')->default(0); //yyyymmddhhmmss
             $table->string('created_by')->nullable();
             $table->string('updated_by')->nullable();
             $table->timestamps();

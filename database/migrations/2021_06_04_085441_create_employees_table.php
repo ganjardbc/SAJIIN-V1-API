@@ -25,6 +25,7 @@ class CreateEmployeesTable extends Migration
             $table->enum('status', ['active', 'inactive'])->default('inactive');
             $table->unsignedBigInteger('shop_id')->nullable();
             $table->unsignedBigInteger('position_id')->nullable();
+            $table->bigInteger('loki_index')->default(0); //yyyymmddhhmmss
             $table->string('created_by')->nullable();
             $table->string('updated_by')->nullable();
             $table->timestamps();

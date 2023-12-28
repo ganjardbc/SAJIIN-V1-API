@@ -4,11 +4,11 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
-use App\Platform;
+use App\Discount;
 use App\Shop;
 use Image;
 
-class PlatformController extends Controller
+class DiscountController extends Controller
 {
     public function __construct()
     {
@@ -35,39 +35,33 @@ class PlatformController extends Controller
         } 
         else 
         {
+            $data = [];
+            $totalRecord = 0;
             $search = $req['search'];
             $limit = $req['limit'];
             $offset = $req['offset'];
             $status = $req['status'] ? ['status' => $req['status']] : [];
-            $data = [];
-            $totalRecord = 0;
-
-            $newStatus = $status;
-            if ($req['shop_id']) {
-                $newStatus = array_merge($status, ['shop_id' => $req['shop_id']]);
-            }
-
-            $data = Platform::where($newStatus)
+            $shopStatus = $req['shop_id'] ? ['shop_id' => $req['shop_id']] : [];
+            $discountTypeStatus = $req['discount_type'] ? ['discount_type' => $req['discount_type']] : [];
+            $discountValueTypeStatus = $req['discount_value_type'] ? ['discount_value_type' => $req['discount_value_type']] : [];
+            $newStatus = array_merge($status, $shopStatus, $discountTypeStatus, $discountValueTypeStatus);
+            $data = Discount::where($newStatus)
                 ->where(function ($query) use ($search) {
-                    $query->where('platform_id', 'LIKE', '%'.$search.'%')
-                        ->orWhere('name', 'LIKE', '%'.$search.'%')
-                        ->orWhere('order_fee', 'LIKE', '%'.$search.'%')
-                        ->orWhere('order_type', 'LIKE', '%'.$search.'%')
-                        ->orWhere('currency_type', 'LIKE', '%'.$search.'%')
-                        ->orWhere('description', 'LIKE', '%'.$search.'%');
+                    $query->where('discount_id', 'LIKE', '%'.$search.'%')
+                        ->orWhere('discount_name', 'LIKE', '%'.$search.'%')
+                        ->orWhere('discount_value', 'LIKE', '%'.$search.'%')
+                        ->orWhere('discount_description', 'LIKE', '%'.$search.'%');
                 })
                 ->limit($limit)
                 ->offset($offset)
                 ->orderBy('id', 'desc')
                 ->get();
-            $totalRecord = Platform::where($newStatus)
+            $totalRecord = Discount::where($newStatus)
                 ->where(function ($query) use ($search) {
-                    $query->where('platform_id', 'LIKE', '%'.$search.'%')
-                        ->orWhere('name', 'LIKE', '%'.$search.'%')
-                        ->orWhere('order_fee', 'LIKE', '%'.$search.'%')
-                        ->orWhere('order_type', 'LIKE', '%'.$search.'%')
-                        ->orWhere('currency_type', 'LIKE', '%'.$search.'%')
-                        ->orWhere('description', 'LIKE', '%'.$search.'%');
+                    $query->where('discount_id', 'LIKE', '%'.$search.'%')
+                        ->orWhere('discount_name', 'LIKE', '%'.$search.'%')
+                        ->orWhere('discount_value', 'LIKE', '%'.$search.'%')
+                        ->orWhere('discount_description', 'LIKE', '%'.$search.'%');
                 })
                 ->count();
 
@@ -99,7 +93,7 @@ class PlatformController extends Controller
     public function getByID(Request $req)
     {
         $validator = Validator::make($req->all(), [
-            'platform_id' => 'required|string|min:0',
+            'discount_id' => 'required|string|min:0|max:17',
         ]);
 
         $response = [];
@@ -115,8 +109,8 @@ class PlatformController extends Controller
         } 
         else 
         {
-            $platform_id = $req['platform_id'];
-            $data = Platform::where(['platform_id' => $platform_id])->first();
+            $discount_id = $req['discount_id'];
+            $data = Discount::where(['discount_id' => $discount_id])->first();
             
             if ($data) 
             {
@@ -144,7 +138,7 @@ class PlatformController extends Controller
     public function removeImage(Request $req) 
     {
         $validator = Validator::make($req->all(), [
-            'platform_id' => 'required|string|min:0',
+            'discount_id' => 'required|string|min:0|max:17',
         ]);
         
         $response = [];
@@ -161,24 +155,24 @@ class PlatformController extends Controller
         else 
         {
             $payload = [
-                'image' => '',
+                'discount_image' => '',
                 'updated_by' => Auth()->user()->id,
                 'updated_at' => date('Y-m-d H:i:s')
             ];
 
-            $filename = Platform::where(['platform_id' => $req['platform_id']])->first()->image;
-            $data = Platform::where(['platform_id' => $req['platform_id']])->update($payload);
+            $filename = Discount::where(['discount_id' => $req['discount_id']])->first()->image;
+            $data = Discount::where(['discount_id' => $req['discount_id']])->update($payload);
 
             if ($data)
             {
-                unlink(public_path('contents/platforms/thumbnails/'.$filename));
-				unlink(public_path('contents/platforms/covers/'.$filename));
+                unlink(public_path('contents/discounts/thumbnails/'.$filename));
+				unlink(public_path('contents/discounts/covers/'.$filename));
 
                 $response = [
                     'message' => 'proceed success',
                     'status' => 'ok',
                     'code' => '201',
-                    'data' => Platform::where(['platform_id' => $req['platform_id']])->first()
+                    'data' => Discount::where(['discount_id' => $req['discount_id']])->first()
                 ];
             }
             else 
@@ -196,7 +190,7 @@ class PlatformController extends Controller
     public function uploadImage(Request $req) 
     {
         $validator = Validator::make($req->all(), [
-            'platform_id' => 'required|string|min:0',
+            'discount_id' => 'required|string|min:0|max:17',
             'image' => 'image|mimes:jpeg,png,jpg,gif,svg|max:1000000'
         ]);
 
@@ -213,7 +207,7 @@ class PlatformController extends Controller
         } 
         else 
         {
-            $id = $req['platform_id'];
+            $id = $req['discount_id'];
             $image = $req['image'];
 
             $chrc = array('[',']','@',' ','+','-','#','*','<','>','_','(',')',';',',','&','%','$','!','`','~','=','{','}','/',':','?','"',"'",'^');
@@ -223,25 +217,25 @@ class PlatformController extends Controller
 
             //save image to server
 			//creating thumbnail and save to server
-			$destination = public_path('contents/platforms/thumbnails/'.$filename);
+			$destination = public_path('contents/discounts/thumbnails/'.$filename);
 			$img = Image::make($image->getRealPath());
 			$thumbnail = $img->resize(400, 400, function ($constraint) {
 					$constraint->aspectRatio();
 				})->save($destination); 
 
 			//saving image real to server
-			$destination = public_path('contents/platforms/covers/');
+			$destination = public_path('contents/discounts/covers/');
 			$real = $image->move($destination, $filename);
 
             if ($thumbnail && $real) 
 			{
                 $payload = [
-                    'image' => $filename,
+                    'discount_image' => $filename,
                     'updated_by' => Auth()->user()->id,
                     'updated_at' => date('Y-m-d H:i:s')
                 ];
     
-                $data = Platform::where(['platform_id' => $req['platform_id']])->update($payload);
+                $data = Discount::where(['discount_id' => $req['discount_id']])->update($payload);
     
                 if ($data)
                 {
@@ -249,7 +243,7 @@ class PlatformController extends Controller
                         'message' => 'proceed success',
                         'status' => 'ok',
                         'code' => '201',
-                        'data' => Platform::where(['platform_id' => $req['platform_id']])->first()
+                        'data' => Discount::where(['discount_id' => $req['discount_id']])->first()
                     ];
                 }
                 else 
@@ -279,12 +273,11 @@ class PlatformController extends Controller
     public function post(Request $req)
     {
         $validator = Validator::make($req->all(), [
-            'platform_id' => 'required|string|min:0|unique:platforms',
-            'name' => 'required|string',
-            'currency_type' => 'required|string',
-            'order_fee' => 'required|integer',
-            'order_type' => 'required|string',
-            'is_available' => 'required|boolean',
+            'discount_id' => 'required|string|min:0|unique:discounts',
+            'discount_name' => 'required|string',
+            'discount_type' => 'required|string',
+            'discount_value_type' => 'required|string',
+            'discount_value' => 'required|integer',
             'status' => 'required|string',
             'shop_id' => 'required|integer'
         ]);
@@ -303,20 +296,20 @@ class PlatformController extends Controller
         else 
         {
             $payload = [
-                'platform_id' => $req['platform_id'],
-                'name' => $req['name'],
-                'description' => $req['description'],
-                'currency_type' => $req['currency_type'],
-                'order_fee' => $req['order_fee'],
-                'order_type' => $req['order_type'],
-                'is_available' => $req['is_available'],
+                'discount_id' => $req['discount_id'],
+                'discount_name' => $req['discount_name'],
+                'discount_description' => $req['discount_description'],
+                'discount_type' => $req['discount_type'],
+                'discount_value_type' => $req['discount_value_type'],
+                'discount_value' => $req['discount_value'],
+                'is_public' => false,
                 'status' => $req['status'],
                 'shop_id' => $req['shop_id'],
                 'created_by' => Auth()->user()->id,
                 'created_at' => date('Y-m-d H:i:s')
             ];
 
-            $data = Platform::insert($payload);
+            $data = Discount::insert($payload);
 
             if ($data)
             {
@@ -324,7 +317,7 @@ class PlatformController extends Controller
                     'message' => 'proceed success',
                     'status' => 'ok',
                     'code' => '201',
-                    'data' => Platform::where(['platform_id' => $req['platform_id']])->first()
+                    'data' => Discount::where(['discount_id' => $req['discount_id']])->first()
                 ];
             }
             else 
@@ -344,12 +337,11 @@ class PlatformController extends Controller
     public function update(Request $req)
     {
         $validator = Validator::make($req->all(), [
-            'platform_id' => 'required|string|min:0',
-            'name' => 'required|string',
-            'currency_type' => 'required|string',
-            'order_fee' => 'required|integer',
-            'order_type' => 'required|string',
-            'is_available' => 'required|boolean',
+            'discount_id' => 'required|string|min:0',
+            'discount_name' => 'required|string',
+            'discount_type' => 'required|string',
+            'discount_value_type' => 'required|string',
+            'discount_value' => 'required|integer',
             'status' => 'required|string',
             'shop_id' => 'required|integer'
         ]);
@@ -368,19 +360,19 @@ class PlatformController extends Controller
         else 
         {
             $payload = [
-                'name' => $req['name'],
-                'description' => $req['description'],
-                'currency_type' => $req['currency_type'],
-                'order_fee' => $req['order_fee'],
-                'order_type' => $req['order_type'],
-                'is_available' => $req['is_available'],
+                'discount_name' => $req['discount_name'],
+                'discount_description' => $req['discount_description'],
+                'discount_type' => $req['discount_type'],
+                'discount_value_type' => $req['discount_value_type'],
+                'discount_value' => $req['discount_value'],
+                'is_public' => false,
                 'status' => $req['status'],
                 'shop_id' => $req['shop_id'],
                 'updated_by' => Auth()->user()->id,
                 'updated_at' => date('Y-m-d H:i:s')
             ];
 
-            $data = Platform::where(['platform_id' => $req['platform_id']])->update($payload);
+            $data = Discount::where(['discount_id' => $req['discount_id']])->update($payload);
 
             if ($data)
             {
@@ -388,7 +380,7 @@ class PlatformController extends Controller
                     'message' => 'proceed success',
                     'status' => 'ok',
                     'code' => '201',
-                    'data' => Platform::where(['platform_id' => $req['platform_id']])->first()
+                    'data' => Discount::where(['discount_id' => $req['discount_id']])->first()
                 ];
             }
             else 
@@ -408,7 +400,7 @@ class PlatformController extends Controller
     public function delete(Request $req)
     {
         $validator = Validator::make($req->all(), [
-            'platform_id' => 'required|string|min:0',
+            'discount_id' => 'required|string|min:0',
         ]);
 
         $response = [];
@@ -424,7 +416,7 @@ class PlatformController extends Controller
         } 
         else 
         {
-            $data = Platform::where(['platform_id' => $req['platform_id']])->delete();
+            $data = Discount::where(['discount_id' => $req['discount_id']])->delete();
 
             if ($data)
             {

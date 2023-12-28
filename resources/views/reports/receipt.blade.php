@@ -181,6 +181,7 @@
                     <th class="right">Total</th>
                 </thead>
                 <tbody>
+                    <?php $discount_product = 0; ?>
                     @foreach($response['data']['details'] as $item)
                         <tr>
                             <td style="padding-bottom: 5px;" class="left">
@@ -195,6 +196,11 @@
                             <td style="padding-bottom: 5px;" class="middle">{{ $item['quantity'] }}</td>
                             <td style="padding-bottom: 5px;" class="right">Rp. {{ number_format($item['subtotal'], 0) }}</td>
                         </tr>
+                        <?php 
+                            if ($item['is_discount']) {
+                                $discount_product += $item['discount_price'] * $item['quantity']; 
+                            }
+                        ?>
                     @endforeach
                 </tbody>
             </table>
@@ -208,29 +214,23 @@
                         <td class="middle"></td>
                         <td class="right">Rp. {{ number_format($response['data']['order']['total_price'], 0) }}</td>
                     </tr>
-                    <tr>
-                        <td class="left">Diskon</td>
-                        <td class="middle"></td>
-                        <td class="right">Rp. 0</td>
-                    </tr>
                 </tbody>
             </table>
         </div>
 
-        <!-- HIDDEN TEMPORARY -->
-        <!-- @if($response['data']['order']['is_discount'])
+        @if($response['data']['order']['discount_price'] || $discount_product)
             <div class="space border-top" style="padding-top: 5px;">
                 <table class="table">
                     <tbody>
                         <tr>
-                            <td class="left">Discount</td>
+                            <td class="left">Diskon</td>
                             <td class="middle"></td>
-                            <td class="right">Rp. {{ number_format($response['data']['order']['total_discount'], 0) }}</td>
+                            <td class="right">Rp. {{ number_format(($response['data']['order']['discount_price'] + $discount_product), 0) }}</td>
                         </tr>
                     </tbody>
                 </table>
             </div>
-        @endif  -->
+        @endif
         
         <div class="space border-top" style="padding-top: 5px;">
             <table class="table">

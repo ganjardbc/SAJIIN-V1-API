@@ -23,6 +23,7 @@ class CreateTablesTable extends Migration
             $table->boolean('is_available');
             $table->enum('status', ['active', 'inactive'])->default('inactive');
             $table->unsignedBigInteger('shop_id');
+            $table->bigInteger('loki_index')->default(0); //yyyymmddhhmmss
             $table->string('created_by')->nullable();
             $table->string('updated_by')->nullable();
             $table->timestamps();

@@ -583,11 +583,13 @@ class OrderController extends Controller
             for ($i=0; $i < count($dump); $i++) { 
                 $expense = $dump[$i];
                 $type = ExpenseType::where(['id' => $dump[$i]['expense_type_id']])->first();
+                $payment = Payment::where(['id' => $dump[$i]['payment_id']])->first();
                 $shop = Shop::where(['id' => $dump[$i]['shop_id']])->first();
 
                 $payload = [
                     'expense' => $expense,
                     'type' => $type,
+                    'payment' => $payment,
                     'shop' => $shop
                 ];
 
@@ -653,7 +655,7 @@ class OrderController extends Controller
             $limit = $req['limit'];
             $offset = $req['offset'];
             $totalRecord = 0;
-            $status = $req['status'] ? ['status' => $req['status']] : [['status', '!=', 'canceled']];
+            $status = $req['status'] ? ['status' => $req['status']] : [['status', '!=', 'done'], ['status', '!=', 'canceled']];
             $paymentStatus = $req['payment_status'] == '0' || $req['payment_status'] == '1' ? ['payment_status' => $req['payment_status']] : [];
             $cashbookStatus = $req['cashbook_id'] ? ['cashbook_id' => $req['cashbook_id']] : [];
             $newStatus = array_merge($status, $paymentStatus, $cashbookStatus, ['shop_id' => $shopID]);
@@ -697,14 +699,6 @@ class OrderController extends Controller
                     $shop = Shop::where(['id' => $dump[$i]['shop_id']])->first();
                     $cashier = User::where(['id' => $dump[$i]['created_by']])->first();
 
-                    // is there discount
-                    $is_discount = false;
-                    for ($index_is_discount=0; $index_is_discount < count($orderItems); $index_is_discount++) { 
-                        if ($orderItems[$index_is_discount]['is_discount']) {
-                            $is_discount = true;
-                        }
-                    }
-
                     // total full price
                     $total_full_price = 0;
                     for ($index_full_price=0; $index_full_price < count($orderItems); $index_full_price++) { 
@@ -718,7 +712,6 @@ class OrderController extends Controller
                     // total discount 
                     $total_discount = $total_full_price - $order['total_price'];
 
-                    $order['is_discount'] = $is_discount;
                     $order['total_full_price'] = $total_full_price;
                     $order['total_discount'] = $total_discount;
 
@@ -1007,30 +1000,104 @@ class OrderController extends Controller
         } 
         else 
         {
-            $payloadOrder = $req['order'];
-            $payloadOrder['created_by'] = Auth()->user()->id;
-            $payloadOrder['created_at'] = date('Y-m-d H:i:s');
+            $payloadOrder = [
+                'order_id' => $req['order']['order_id'],
+                'note' => $req['order']['note'],
+                'status' => $req['order']['status'],
+                'type' => $req['order']['type'],
+                'total_item' => $req['order']['total_item'],
+                'total_price' => $req['order']['total_price'],
+                'bills_price' => $req['order']['bills_price'],
+                'cashbook_id' => $req['order']['cashbook_id'],
+                'cashier_name' => $req['order']['cashier_name'],
+                'change_price' => $req['order']['change_price'],
+                'customer_id' => $req['order']['customer_id'],
+                'customer_name' => $req['order']['customer_name'],
+                'payment_id' => $req['order']['payment_id'],
+                'payment_name' => $req['order']['payment_name'],
+                'payment_status' => $req['order']['payment_status'],
+                'platform_id' => $req['order']['platform_id'],
+                'platform_price' => $req['order']['platform_price'],
+                'platform_fee' => $req['order']['platform_fee'],
+                'platform_image' => $req['order']['platform_image'],
+                'platform_name' => $req['order']['platform_name'],
+                'platform_type' => $req['order']['platform_type'],
+                'platform_currency_type' => $req['order']['platform_currency_type'],
+                'is_platform' => $req['order']['is_platform'],
+                'discount_id' => $req['order']['discount_id'],
+                'discount_image' => $req['order']['discount_image'],
+                'discount_name' => $req['order']['discount_name'],
+                'discount_description' => $req['order']['discount_description'],
+                'discount_price' => $req['order']['discount_price'],
+                'discount_fee' => $req['order']['discount_fee'],
+                'discount_type' => $req['order']['discount_type'],
+                'discount_value' => $req['order']['discount_value'],
+                'discount_value_type' => $req['order']['discount_value_type'],
+                'is_discount' => $req['order']['is_discount'],
+                'shop_id' => $req['order']['shop_id'],
+                'shop_name' => $req['order']['shop_name'],
+                'table_id' => $req['order']['table_id'],
+                'table_name' => $req['order']['table_name'],
+                'proof_of_payment' => $req['order']['proof_of_payment'],
+                'created_by' => Auth()->user()->id,
+                'created_at' => date('Y-m-d H:i:s')
+            ];
 
             $order = Order::insert($payloadOrder);
             if ($order) 
             {
                 $dataOrder = Order::where(['order_id' => $payloadOrder['order_id']])->first();
 
-                if ($dataOrder->table_id) {
-                    Table::where(['id' => $dataOrder->table_id])->update(['status' => 'inactive']);
+                if ($dataOrder['table_id']) {
+                    Table::where(['id' => $dataOrder['table_id']])->update(['status' => 'inactive']);
                 }
 
-                $newPayloadItems = [];
                 $payloadItems = $req['details'];
-
-                $dump = $payloadItems;
-
-                for ($i=0; $i < count($dump); $i++) { 
-                    $dump[$i]['order_id'] = $dataOrder['id'];
-                    array_push($newPayloadItems, $dump[$i]);
+                $payloadOrderItems = [];
+                for ($i=0; $i < count($payloadItems); $i++) { 
+                    $items = $payloadItems[$i];
+                    $payload = [
+                        'note' => $items['note'],
+                        'price' => $items['price'],
+                        'second_price' => $items['second_price'],
+                        'quantity' => $items['quantity'],
+                        'subtotal' => $items['subtotal'],
+                        'discount' => $items['discount'],
+                        'discount_id' => $items['discount_id'],
+                        'discount_image' => $items['discount_image'],
+                        'discount_name' => $items['discount_name'],
+                        'discount_description' => $items['discount_description'],
+                        'discount_price' => $items['discount_price'],
+                        'discount_fee' => $items['discount_fee'],
+                        'discount_type' => $items['discount_type'],
+                        'discount_value' => $items['discount_value'],
+                        'discount_value_type' => $items['discount_value_type'],
+                        'is_discount' => $items['is_discount'],
+                        'platform' => $items['platform'],
+                        'platform_id' => $items['platform_id'],
+                        'platform_price' => $items['platform_price'],
+                        'platform_fee' => $items['platform_fee'],
+                        'platform_image' => $items['platform_image'],
+                        'platform_name' => $items['platform_name'],
+                        'platform_type' => $items['platform_type'],
+                        'platform_currency_type' => $items['platform_currency_type'],
+                        'is_platform' => $items['is_platform'],
+                        'proddetail_id' => $items['proddetail_id'],
+                        'product_detail' => $items['product_detail'],
+                        'product_id' => $items['product_id'],
+                        'product_image' => $items['product_image'],
+                        'product_name' => $items['product_name'],
+                        'status' => $items['status'],
+                        'assigned_id' => $items['assigned_id'],
+                        'shop_id' => $items['shop_id'],
+                        'order_id' => $dataOrder['id'],
+                        'created_by' => Auth()->user()->id,
+                        'created_at' => date('Y-m-d H:i:s')
+                    ];
+                    array_push($payloadOrderItems, $payload);
                 }
 
-                $item = OrderItem::insert($newPayloadItems);
+                $item = OrderItem::insert($payloadOrderItems);
 
                 if ($item) 
                 {
@@ -1487,30 +1554,46 @@ class OrderController extends Controller
             $dataOldOrder = Order::where(['order_id' => $req['order_id']])->first();
 
             $payload = [
-                'delivery_fee' => $req['delivery_fee'],
+                'status' => $req['status'],
+                'type' => $req['type'],
+                'note' => $req['note'],
                 'total_price' => $req['total_price'],
                 'total_item' => $req['total_item'],
                 'bills_price' => $req['bills_price'],
                 'change_price' => $req['change_price'],
-                'payment_status' => $req['payment_status'],
-                'cashier_name' => $req['cashier_name'],
-                'shop_name' => $req['shop_name'],
-                'table_name' => $req['table_name'],
-                'customer_name' => $req['customer_name'],
-                'payment_name' => $req['payment_name'],
-                'shipment_name' => $req['shipment_name'],
-                'proof_of_payment' => $req['proof_of_payment'],
-                'status' => $req['status'],
-                'type' => $req['type'],
-                'note' => $req['note'],
-                'shop_id' => $req['shop_id'],
-                'table_id' => $req['table_id'],
-                'customer_id' => $req['customer_id'],
-                'address_id' => $req['address_id'],
-                'shipment_id' => $req['shipment_id'],
                 'payment_id' => $req['payment_id'],
+                'payment_name' => $req['payment_name'],
+                'payment_status' => $req['payment_status'],
                 'cashbook_id' => $req['cashbook_id'],
+                'cashier_name' => $req['cashier_name'],
                 'platform_id' => $req['platform_id'],
+                'platform_price' => $req['platform_price'],
+                'platform_fee' => $req['platform_fee'],
+                'platform_image' => $req['platform_image'],
+                'platform_name' => $req['platform_name'],
+                'platform_type' => $req['platform_type'],
+                'platform_currency_type' => $req['platform_currency_type'],
+                'is_platform' => $req['is_platform'],
+                'discount_id' => $req['discount_id'],
+                'discount_image' => $req['discount_image'],
+                'discount_name' => $req['discount_name'],
+                'discount_description' => $req['discount_description'],
+                'discount_price' => $req['discount_price'],
+                'discount_fee' => $req['discount_fee'],
+                'discount_type' => $req['discount_type'],
+                'discount_value' => $req['discount_value'],
+                'discount_value_type' => $req['discount_value_type'],
+                'is_discount' => $req['is_discount'],
+                'shop_id' => $req['shop_id'],
+                'shop_name' => $req['shop_name'],
+                'table_id' => $req['table_id'],
+                'table_name' => $req['table_name'],
+                'customer_id' => $req['customer_id'],
+                'customer_name' => $req['customer_name'],
+                'shipment_id' => $req['shipment_id'],
+                'shipment_name' => $req['shipment_name'],
+                'delivery_fee' => $req['delivery_fee'],
+                'proof_of_payment' => $req['proof_of_payment'],
                 'updated_by' => Auth()->user()->id,
                 'updated_at' => date('Y-m-d H:i:s')
             ];

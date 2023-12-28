@@ -39,6 +39,7 @@ class CreateOrdersTable extends Migration
             $table->unsignedBigInteger('shipment_id')->nullable();
             $table->unsignedBigInteger('payment_id')->nullable();
             $table->unsignedBigInteger('cashbook_id')->nullable();
+            $table->bigInteger('loki_index')->default(0); //yyyymmddhhmmss
             $table->string('created_by')->nullable();
             $table->string('updated_by')->nullable();
             $table->timestamps();

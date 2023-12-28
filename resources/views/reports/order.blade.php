@@ -115,8 +115,8 @@
 				<tr>
 					<th width="20" style="text-align: center;">No</th>
 					<th width="100">Order ID</th>
-                    <th width="80">Platform</th>
 					<th>Produk</th>
+                    <th width="100">Diskon</th>
 					<th width="110" style="text-align: right;">Total</th>
 				</tr>
 			</thead>
@@ -138,25 +138,48 @@
                                     <div>{{ date_format(date_create($item['order']['created_at']), 'd M Y') }}</div>
                                 @endif
                             </td>
-                            <td style="border-bottom: {{ $indexDetail != $totalDetails ? '1px solid #fff' : '' }}; }}">
-                                @if($indexDetail == 1)
-                                    {{ $item['order']['platform_name'] ? $item['order']['platform_name'] : '-' }}
-                                @endif
-                            </td>
                             <td>
-                                <div>
+                                <div style="font-weight: bold;">
                                     {{ $detail['product_name'] }}
                                     @if($detail['product_detail']) 
                                         <span> - {{ $detail['product_detail'] }}</span>
                                     @endif
                                 </div>
                                 <div style="padding-bottom: 20px;">
-                                    <div style="text-align: right; float: left;">{{ $detail['quantity'] }} x</div>
+                                    <div style="text-align: right; float: left;">Harga</div>
                                     <div style="text-align: right; float: right; font-weight: bold;">Rp {{ number_format($detail['price'], 0) }}</div>
+                                </div>
+                                @if($detail['is_discount'])
+                                    <div style="padding-bottom: 20px;">
+                                        <div style="text-align: right; font-size: 11px; float: left; margin-left: 10px;">Diskon : {{ $detail['discount_name'] }}</div>
+                                        <div style="text-align: right; font-size: 11px; float: right;">Rp {{ number_format($detail['discount_price'], 0) }}</div>
+                                    </div>
+                                @endif 
+                                @if($detail['is_platform'])
+                                    <div style="padding-bottom: 20px;">
+                                        <div style="text-align: right; font-size: 11px; float: left; margin-left: 10px;">Platform : {{ $detail['platform_name'] }}</div>
+                                        <div style="text-align: right; font-size: 11px; float: right;">Rp {{ number_format($detail['platform_price'], 0) }}</div>
+                                    </div>
+                                @endif 
+                                <div style="padding-bottom: 20px;">
+                                    <div style="text-align: right; float: left;">Jumlah</div>
+                                    <div style="text-align: right; float: right; font-weight: bold;">{{ $detail['quantity'] }}x</div>
                                 </div>
                             </td>
                             <td style="border-bottom: {{ $indexDetail != $totalDetails ? '1px solid #fff' : '' }}; }}">
                                 @if($indexDetail == 1)
+                                    <div style="padding-bottom: 5px;">{{ $item['order']['discount_name'] ? $item['order']['discount_name'] : '-' }}</div>
+                                    @if($item['order']['is_discount'])
+                                        <div style="padding-bottom: 20px;">
+                                            <div style="text-align: right; font-size: 11px; float: left;">Biaya</div>
+                                            <div style="text-align: right; font-size: 11px; float: right;">Rp {{ number_format($item['order']['discount_price'], 0) }}</div>
+                                        </div>
+                                    @endif 
+                                @endif
+                            </td>
+                            <td style="border-bottom: {{ $indexDetail != $totalDetails ? '1px solid #fff' : '' }}; }}">
+                                @if($indexDetail == 1)
+                                    <div style="text-align: right; font-weight: normal; padding-bottom: 5px;">{{ number_format($item['order']['total_item'], 0) }} produk</div>    
                                     <div style="text-align: right; font-weight: bold;">Rp {{ number_format($item['order']['total_price'], 0) }}</div>
                                 @endif
                             </td>
@@ -164,15 +187,12 @@
                         @php $indexDetail++ @endphp
                     @endforeach 
                 @endforeach
-
                 <tr>
-                    <td colspan="3">
+                    <td colspan="4">
                         <div style="text-align: left; font-weight: bold; font-size: 13px;">Total Keseluruhan</div>
                     </td>
                     <td>
-                        <div style="text-align: left; font-weight: bold; font-size: 13px;">{{ $response['grand_item'] }} produk</div>
-                    </td>
-                    <td>
+                        <div style="text-align: right; font-weight: normal; font-size: 13px; padding-bottom: 5px;">{{ $response['grand_item'] }} produk</div>
                         <div style="text-align: right; font-weight: bold; font-size: 13px;">Rp {{ number_format($response['grand_total'], 0) }}</div>
                     </td>
                 </tr>
@@ -187,9 +207,9 @@
 				<tr>
 					<th width="20" style="text-align: center;">No</th>
 					<th width="100">Expense ID</th>
-					<th width="80">Tgl Pengeluaran</th>
-                    <th>Tipe Pengeluaran</th>
-					<th width="110" style="text-align: right;">Total</th>
+                    <th width="120">Tipe Pengeluaran</th>
+                    <th width="120">Pembayaran</th>
+					<th style="text-align: right;">Total</th>
 				</tr>
 			</thead>
 			<tbody>
@@ -197,37 +217,22 @@
                 @foreach($response['expense_list'] as $item)
                 <tr>
 					<td style="text-align: center;">{{ $i++ }}</td>
-					<td>{{ $item['expense']['expense_list_id'] }}</td>
-                    <td>{{ date_format(date_create($item['expense']['expense_date']), 'd M Y') }}</td>
+					<td>
+                        <div style="font-weight: bold; font-size: 13px;">{{ $item['expense']['expense_list_id'] }}</div>
+                        <div>{{ date_format(date_create($item['expense']['expense_date']), 'd M Y') }}</div>
+                    </td>
                     <td>
                         <div>{{ $item['type']['name'] }}</div>
                         @if($item['expense']['description'])
-                            <div>NB : {{ $item['expense']['description'] }}</div>
+                            <div style="font-size: 11px;">NB : {{ $item['expense']['description'] }}</div>
                         @endif
                     </td>
+                    <td>{{ $item['payment'] ? $item['payment']['name'] : '-' }}</td>
                     <td>
                         <div style="text-align: right; font-weight: bold;">Rp {{ number_format($item['expense']['expense_price'], 0) }}</div>
                     </td>
 				</tr>
                 @endforeach 
-
-                <!-- <tr>
-                    <td colspan="4">
-                        <div style="text-align: left; font-weight: normal; font-size: 13px;">Total Pengeluaran</div>
-                    </td>
-                    <td>
-                        <div style="text-align: right; font-weight: normal; font-size: 13px;">Rp {{ number_format($response['expense_list_total'], 0) }}</div>
-                    </td>
-                </tr> -->
-
-                <!-- <tr>
-                    <td colspan="4">
-                        <div style="text-align: left; font-weight: normal; font-size: 13px;">Kembalian Penjualan</div>
-                    </td>
-                    <td>
-                        <div style="text-align: right; font-weight: normal; font-size: 13px;">Rp {{ number_format($response['grand_change'], 0) }}</div>
-                    </td>
-                </tr> -->
 
                 <tr>
                     <td colspan="4">

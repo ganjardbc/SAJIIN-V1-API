@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateShiftsTable extends Migration
+class CreateDiscountConfigurationsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,13 +13,16 @@ class CreateShiftsTable extends Migration
      */
     public function up()
     {
-        Schema::create('shifts', function (Blueprint $table) {
+        Schema::create('discounts', function (Blueprint $table) {
             $table->id();
-            $table->string('shift_id')->unique();
-            $table->string('title');
-            $table->string('description')->nullable();
-            $table->string('start_time')->nullable();
-            $table->string('end_time')->nullable();
+            $table->string('discount_id')->unique();
+            $table->string('discount_image')->nullable();
+            $table->string('discount_name');
+            $table->string('discount_description')->nullable();
+            $table->enum('discount_type', ['transaction', 'product'])->nullable();
+            $table->enum('discount_value_type', ['percentage', 'nominal'])->nullable();
+            $table->double('discount_value');
+            $table->boolean('is_public')->default(false);
             $table->enum('status', ['active', 'inactive'])->default('inactive');
             $table->unsignedBigInteger('shop_id');
             $table->bigInteger('loki_index')->default(0); //yyyymmddhhmmss
@@ -38,6 +41,6 @@ class CreateShiftsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('shifts');
+        Schema::dropIfExists('discounts');
     }
 }

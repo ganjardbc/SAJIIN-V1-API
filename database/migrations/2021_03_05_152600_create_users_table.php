@@ -26,6 +26,7 @@ class CreateUsersTable extends Migration
             $table->enum('status', ['active', 'inactive'])->default('inactive');
             $table->unsignedBigInteger('role_id');
             $table->unsignedBigInteger('owner_id')->nullable();
+            $table->bigInteger('loki_index')->default(0); //yyyymmddhhmmss
             $table->rememberToken();
             $table->timestamps();
 

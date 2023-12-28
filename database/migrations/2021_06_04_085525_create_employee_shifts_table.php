@@ -18,6 +18,7 @@ class CreateEmployeeShiftsTable extends Migration
             $table->string('note')->nullable();
             $table->unsignedBigInteger('employee_id');
             $table->unsignedBigInteger('shift_id');
+            $table->bigInteger('loki_index')->default(0); //yyyymmddhhmmss
             $table->string('created_by')->nullable();
             $table->string('updated_by')->nullable();
             $table->timestamps();

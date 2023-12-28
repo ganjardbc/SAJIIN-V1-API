@@ -405,6 +405,17 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('update', 'PlatformController@update');
         Route::post('delete', 'PlatformController@delete');
     });
+
+    // discount 
+    Route::prefix('discount')->group(function () {
+        Route::post('getAll', 'DiscountController@getAll');
+        Route::post('getByID', 'DiscountController@getByID');
+        Route::post('post', 'DiscountController@post');
+        Route::post('uploadImage', 'DiscountController@uploadImage');
+        Route::post('removeImage', 'DiscountController@removeImage');
+        Route::post('update', 'DiscountController@update');
+        Route::post('delete', 'DiscountController@delete');
+    });
 });
 
 Route::prefix('auth')->group(function () {
