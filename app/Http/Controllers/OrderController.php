@@ -1467,12 +1467,48 @@ class OrderController extends Controller
                 $dump = $payloadItems;
 
                 for ($i=0; $i < count($dump); $i++) { 
-                    $dump[$i]['order_id'] = $payloadOrder['id'];
-                    $dump[$i]['created_by'] = Auth()->user()->id;
-                    $dump[$i]['created_at'] = date('Y-m-d H:i:s');
-                    $dump[$i]['updated_by'] = Auth()->user()->id;
-                    $dump[$i]['updated_at'] = date('Y-m-d H:i:s');
-                    array_push($newPayloadItems, $dump[$i]);
+                    $items = $dump[$i];
+                    $payload = [
+                        'note' => $items['note'],
+                        'price' => $items['price'],
+                        'second_price' => $items['second_price'],
+                        'quantity' => $items['quantity'],
+                        'subtotal' => $items['subtotal'],
+                        'discount' => $items['discount'],
+                        'discount_id' => $items['discount_id'],
+                        'discount_image' => $items['discount_image'],
+                        'discount_name' => $items['discount_name'],
+                        'discount_description' => $items['discount_description'],
+                        'discount_price' => $items['discount_price'],
+                        'discount_fee' => $items['discount_fee'],
+                        'discount_type' => $items['discount_type'],
+                        'discount_value' => $items['discount_value'],
+                        'discount_value_type' => $items['discount_value_type'],
+                        'is_discount' => $items['is_discount'],
+                        'platform' => $items['platform'],
+                        'platform_id' => $items['platform_id'],
+                        'platform_price' => $items['platform_price'],
+                        'platform_fee' => $items['platform_fee'],
+                        'platform_image' => $items['platform_image'],
+                        'platform_name' => $items['platform_name'],
+                        'platform_type' => $items['platform_type'],
+                        'platform_currency_type' => $items['platform_currency_type'],
+                        'is_platform' => $items['is_platform'],
+                        'proddetail_id' => $items['proddetail_id'],
+                        'product_detail' => $items['product_detail'],
+                        'product_id' => $items['product_id'],
+                        'product_image' => $items['product_image'],
+                        'product_name' => $items['product_name'],
+                        'status' => $items['status'],
+                        'assigned_id' => $items['assigned_id'],
+                        'shop_id' => $items['shop_id'],
+                        'order_id' => $payloadOrder['id'],
+                        'created_by' => Auth()->user()->id,
+                        'created_at' => date('Y-m-d H:i:s'),
+                        'updated_by' => Auth()->user()->id,
+                        'updated_at' => date('Y-m-d H:i:s')
+                    ];
+                    array_push($newPayloadItems, $payload);
                 }
 
                 $item = OrderItem::insert($newPayloadItems);
@@ -1482,16 +1518,11 @@ class OrderController extends Controller
                     $dataItem = OrderItem::where(['order_id' => $payloadOrder['id']])->get();
 
                     $req['order'] = $payloadOrder;
-                    $req['details'] = $dataItem;
+                    $req['details'] = $newPayloadItems;
                     
                     $payloadResponse = [
                         'order' => $req['order'],
-                        'details' => $req['details'],
-                        'customer' => $req['customer'],
-                        'address' => $req['address'],
-                        'shipment' => $req['shipment'],
-                        'payment' => $req['payment'],
-                        'config' => $req['config']
+                        'details' => $req['details']
                     ];
 
                     $response = [
