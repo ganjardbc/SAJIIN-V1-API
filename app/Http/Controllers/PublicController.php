@@ -451,6 +451,8 @@ class PublicController extends Controller
             $payloadOrder = $req['order'];
             $payloadOrder['created_by'] = '';
             $payloadOrder['created_at'] = date('Y-m-d H:i:s');
+            $payloadOrder['updated_by'] = '';
+            $payloadOrder['updated_at'] = date('Y-m-d H:i:s');
 
             $cashbook = Cashbook::where('shop_id', $payloadOrder['shop_id'])
                 ->where('cash_status', 'open')

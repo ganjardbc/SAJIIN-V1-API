@@ -84,7 +84,7 @@ class OrderItemController extends Controller
                     
                     // order items 
                     $orderItems = array();
-                    $details = OrderItem::where(['order_id' => $dump[$i]['id']])->orderBy('id', 'desc')->get();
+                    $details = OrderItem::where(['order_id' => $dump[$i]['id']])->orderBy('updated_by', 'desc')->get();
                     
                     $dumpDetail = json_decode($details, true);
 

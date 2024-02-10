@@ -68,18 +68,17 @@
             <table style="width: 100%;">
                 <tr style="width: 100%;">
                     <td style="width: 50%;">
-                        <h2 style="font-size: 22px; text-align: left;">{{ $response['shop']['name'] }}</h2>
+                        <h2 style="font-size: 22px; text-align: left;">{{ $response['shop'] ? $response['shop']['name'] : '-' }}</h2>
                         Periode: {{ date_format(date_create($response['range_date'][0]), 'd M Y') }} - {{ date_format(date_create($response['range_date'][1]), 'd M Y') }}
                     </td>
                     <td style="width: 50%; text-align: right;">
-                        @if($response['shop']['image'])
+                        @if($response['shop'] && $response['shop']['image'])
                             <img src="{{ public_path('contents/shops/thumbnails/'.$response['shop']['image']) }}" alt="" style="height: 50px;">
                         @endif 
                     </td>
                 </tr>
             </table>
         </div>
-
         <table id="customers" style="margin-bottom: 20px;">
             <thead>
                 <tr>

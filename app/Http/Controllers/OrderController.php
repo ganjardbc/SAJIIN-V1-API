@@ -655,7 +655,7 @@ class OrderController extends Controller
             $limit = $req['limit'];
             $offset = $req['offset'];
             $totalRecord = 0;
-            $status = $req['status'] ? ['status' => $req['status']] : [['status', '!=', 'done'], ['status', '!=', 'canceled']];
+            $status = $req['status'] ? ['status' => $req['status']] : [['status', '!=', 'canceled']];
             $paymentStatus = $req['payment_status'] == '0' || $req['payment_status'] == '1' ? ['payment_status' => $req['payment_status']] : [];
             $cashbookStatus = $req['cashbook_id'] ? ['cashbook_id' => $req['cashbook_id']] : [];
             $newStatus = array_merge($status, $paymentStatus, $cashbookStatus, ['shop_id' => $shopID]);
@@ -667,7 +667,7 @@ class OrderController extends Controller
                 })
                 ->limit($limit)
                 ->offset($offset)
-                ->orderBy('id', 'desc')
+                ->orderBy('updated_at', 'desc')
                 ->get();
             $totalRecord = Order::where($newStatus)
                 ->where(function ($query) use ($search) {
@@ -1040,7 +1040,9 @@ class OrderController extends Controller
                 'table_name' => $req['order']['table_name'],
                 'proof_of_payment' => $req['order']['proof_of_payment'],
                 'created_by' => Auth()->user()->id,
-                'created_at' => date('Y-m-d H:i:s')
+                'created_at' => date('Y-m-d H:i:s'),
+                'updated_by' => Auth()->user()->id,
+                'updated_at' => date('Y-m-d H:i:s')
             ];
 
             $order = Order::insert($payloadOrder);
@@ -1092,7 +1094,9 @@ class OrderController extends Controller
                         'shop_id' => $items['shop_id'],
                         'order_id' => $dataOrder['id'],
                         'created_by' => Auth()->user()->id,
-                        'created_at' => date('Y-m-d H:i:s')
+                        'created_at' => date('Y-m-d H:i:s'),
+                        'updated_by' => Auth()->user()->id,
+                        'updated_at' => date('Y-m-d H:i:s')
                     ];
                     array_push($payloadOrderItems, $payload);
                 }
@@ -1302,7 +1306,9 @@ class OrderController extends Controller
                 'shipment_id' => $req['shipment_id'],
                 'payment_id' => $req['payment_id'],
                 'created_by' => Auth()->user()->id,
-                'created_at' => date('Y-m-d H:i:s')
+                'created_at' => date('Y-m-d H:i:s'),
+                'updated_by' => Auth()->user()->id,
+                'updated_at' => date('Y-m-d H:i:s')
             ];
 
             $data = Order::insert($payload);
