@@ -41,7 +41,7 @@ class PaymentController extends Controller
             $limit = $req['limit'];
             $offset = $req['offset'];
 
-            $status = $status ? ['status' => $status] : [];
+            $status = $status ? ['status' => $status] : ['status' => 'active'];
             $totalRecord = 0;
 
             $data = Payment::where($status)
