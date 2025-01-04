@@ -416,6 +416,10 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('update', 'DiscountController@update');
         Route::post('delete', 'DiscountController@delete');
     });
+
+    Route::prefix('logs')->group(function () {
+        Route::get('getAll', 'GenericLogController@getAuditLogs');
+    });
 });
 
 Route::prefix('auth')->group(function () {
