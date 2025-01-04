@@ -24,12 +24,20 @@ use App\ExpenseList;
 use App\ExpenseType;
 use App\Notification;
 use Carbon\Carbon;
+use App\Services\LogService;
 
 
 class OrderController extends Controller
 {
-    public function __construct()
+
+    protected $logService;
+
+    public function __construct(LogService $logService)
     {
+
+        // Assign the injected LogService to a class property
+        $this->logService = $logService;
+
         $this->middleware('auth:sanctum', [
             'except' => [
                 'downloadReport',
@@ -1143,6 +1151,13 @@ class OrderController extends Controller
                         'data' => []
                     ];
                 }
+
+                // do log after success create order
+                $logMessage = "Create new order with order id ".$dataOrder['order_id'];
+
+                // Log the transaction
+                $this->logService->createLog($logMessage, $dataOrder['shop_id'], Auth()->user()->id);
+
             } 
             else 
             {
@@ -1715,6 +1730,12 @@ class OrderController extends Controller
                 ];
     
                 Notification::insert($payload);
+
+                // do log after success create order
+                $logMessage = "Update order with order id " . $dataNewOrder['order_id'] . " to status " . $dataNewOrder['status'];
+
+                // Log the transaction
+                $this->logService->createLog($logMessage, $dataNewOrder['shop_id'], Auth()->user()->id);
 
                 $response = [
                     'message' => 'proceed success',
