@@ -24,6 +24,7 @@ use App\ExpenseList;
 use App\ExpenseType;
 use App\Notification;
 use Carbon\Carbon;
+use App\Services\LogService;
 
 
 class OrderController extends Controller
@@ -1155,7 +1156,7 @@ class OrderController extends Controller
                 $logMessage = "Create new order with order id ".$dataOrder['order_id'];
 
                 // Log the transaction
-                $this->logService->createLog($logMessage, $order->shop_id, Auth()->user()->id);
+                $this->logService->createLog($logMessage, $dataOrder['shop_id'], Auth()->user()->id);
 
             } 
             else 
@@ -1734,7 +1735,7 @@ class OrderController extends Controller
                 $logMessage = "Update order with order id " . $dataNewOrder['order_id'] . " to status " . $dataNewOrder['status'];
 
                 // Log the transaction
-                $this->logService->createLog($logMessage, $order->shop_id, Auth()->user()->id);
+                $this->logService->createLog($logMessage, $dataNewOrder['shop_id'], Auth()->user()->id);
 
                 $response = [
                     'message' => 'proceed success',
