@@ -1731,7 +1731,7 @@ class OrderController extends Controller
                 Notification::insert($payload);
 
                 // do log after success create order
-                $logMessage = "Update order with order id ".$dataNewOrder['order_id'];
+                $logMessage = "Update order with order id " . $dataNewOrder['order_id'] . " to status " . $dataNewOrder['status'];
 
                 // Log the transaction
                 $this->logService->createLog($logMessage, $order->shop_id, Auth()->user()->id);
