@@ -19,9 +19,11 @@ class TokenValidationController extends Controller
         }
         
         if (Auth::guard('sanctum')->check()) {
+            $user = Auth::user();
             return response()->json([
                 'statusCode' => 200,
                 'message' => 'Token is valid.',
+                'user' => $user,
             ], 200);
         } else {
             return response()->json([
