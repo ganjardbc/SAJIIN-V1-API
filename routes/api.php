@@ -22,6 +22,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::prefix('auth')->group(function () {
         Route::post('checkUsername', 'AuthController@checkUsername');
         Route::post('checkEmail', 'AuthController@checkEmail');
+        Route::get('validate-token', 'TokenValidationController@validateToken');
     });
 
     // role
