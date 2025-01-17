@@ -113,7 +113,7 @@
 				</tr>
 				<tr>
 					<th width="20" style="text-align: center;">No</th>
-					<th width="100">Order ID</th>
+					<th width="100">Trx ID</th>
 					<th>Produk</th>
                     <th width="100">Diskon</th>
 					<th width="110" style="text-align: right;">Total</th>
@@ -164,6 +164,10 @@
                                     <div style="text-align: right; float: left;">Jumlah</div>
                                     <div style="text-align: right; float: right; font-weight: bold;">{{ $detail['quantity'] }}x</div>
                                 </div>
+                                <div style="padding-bottom: 20px; border-top: 1px dashed #ddd; }}">
+                                    <div style="text-align: right; float: left;">Kembalian</div>
+                                    <div style="text-align: right; float: right; font-weight: bold;">Rp {{ number_format($detail['change_price'], 0) }}</div>
+                                </div>
                             </td>
                             <td style="border-bottom: {{ $indexDetail != $totalDetails ? '1px solid #fff' : '' }}; }}">
                                 @if($indexDetail == 1)
@@ -188,11 +192,26 @@
                 @endforeach
                 <tr>
                     <td colspan="4">
-                        <div style="text-align: left; font-weight: bold; font-size: 13px;">Total Keseluruhan</div>
+                        <div style="text-align: left; font-weight: bold; font-size: 13px;">Jumlah Produk</div>
                     </td>
                     <td>
-                        <div style="text-align: right; font-weight: normal; font-size: 13px; padding-bottom: 5px;">{{ $response['grand_item'] }} produk</div>
+                        <div style="text-align: right; font-weight: bold; font-size: 13px;">{{ $response['grand_item'] }} produk</div>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="4">
+                        <div style="text-align: left; font-weight: bold; font-size: 13px;">Total Penjualan</div>
+                    </td>
+                    <td>
                         <div style="text-align: right; font-weight: bold; font-size: 13px;">Rp {{ number_format($response['grand_total'], 0) }}</div>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="4">
+                        <div style="text-align: left; font-weight: bold; font-size: 13px;">Total Kembalian</div>
+                    </td>
+                    <td>
+                        <div style="text-align: right; font-weight: bold; font-size: 13px;">Rp {{ number_format($response['grand_change'], 0) }}</div>
                     </td>
                 </tr>
             </tbody>
@@ -201,12 +220,12 @@
         <table id="customers" style="margin-bottom: 20px;">
 			<thead>
                 <tr>
-					<th colspan="5" style="text-align: center;">Laporan Pengeluaran</th>
+					<th colspan="5" style="text-align: center;">Laporan Pembelian</th>
 				</tr>
 				<tr>
 					<th width="20" style="text-align: center;">No</th>
-					<th width="100">Expense ID</th>
-                    <th width="120">Tipe Pengeluaran</th>
+					<th width="100">Trx ID</th>
+                    <th width="120">Tipe</th>
                     <th width="120">Pembayaran</th>
 					<th style="text-align: right;">Total</th>
 				</tr>
@@ -232,13 +251,20 @@
                     </td>
 				</tr>
                 @endforeach 
-
                 <tr>
                     <td colspan="4">
-                        <div style="text-align: left; font-weight: bold; font-size: 13px;">Total Keseluruhan</div>
+                        <div style="text-align: left; font-weight: bold; font-size: 13px;">Jumlah Pembelian</div>
                     </td>
                     <td>
-                        <div style="text-align: right; font-weight: bold; font-size: 13px;">Rp {{ number_format($response['cash_out'], 0) }}</div>
+                        <div style="text-align: right; font-weight: bold; font-size: 13px;">{{ $response['expense_list_item'] }} transaksi</div>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="4">
+                        <div style="text-align: left; font-weight: bold; font-size: 13px;">Total Pembelian</div>
+                    </td>
+                    <td>
+                        <div style="text-align: right; font-weight: bold; font-size: 13px;">Rp {{ number_format($response['expense_list_total'], 0) }}</div>
                     </td>
                 </tr>
             </tbody>
