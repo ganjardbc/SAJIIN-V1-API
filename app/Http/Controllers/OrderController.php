@@ -148,6 +148,9 @@ class OrderController extends Controller
                 $cashOutOrder = Order::where($newStatus)
                     ->where('status', '!=', 'canceled')
                     ->sum('change_price');
+                $discountOrder = Order::where($newStatus)
+                    ->where('status', '!=', 'canceled')
+                    ->sum('discount_price');
                 
                 // EXPENSE LIST 
                 $expenseList = ExpenseList::where(array_merge($cashbookStatus, ['shop_id' => $shopID]))
@@ -166,7 +169,12 @@ class OrderController extends Controller
                 $cashActual = $cashBook['cash_actual'];
                 $cashOut = $cashOutOrder + $expenseListTotal;
                 $cashSummary = ($cashModal + $cashIn) - $cashOut;
+                $cashFlow = $grandTotal - $expenseListTotal;
+                $cashEnding = $cashModal + $cashFlow;
                 $cashProfit = $cashSummary - $cashModal;
+                $lossProfit = $cashOutOrder - $discountOrder;
+                $lossProfitOperational = $lossProfit + $cashOut;
+                $lossProfitClean = $lossProfitOperational + $cashSummary;
             }
             else 
             {
@@ -209,6 +217,9 @@ class OrderController extends Controller
                 $cashOutOrder = Order::where($newStatus)
                     ->whereIn('cashbook_id', $cashBookIds)
                     ->sum('change_price');
+                $discountOrder = Order::where($newStatus)
+                    ->whereIn('cashbook_id', $cashBookIds)
+                    ->sum('discount_price');
                 
                 // EXPENSE LIST
                 $expenseList = ExpenseList::where($newExpenseStatus)
@@ -232,6 +243,11 @@ class OrderController extends Controller
 
                 $cashSummary = ($cashModal + $cashIn) - $cashOut;
                 $cashProfit = $cashSummary - $cashModal;
+                $cashFlow = $grandTotal - $expenseListTotal;
+                $cashEnding = $cashModal + $cashFlow;
+                $lossProfit = $cashOutOrder - $discountOrder;
+                $lossProfitOperational = $lossProfit + $cashOut;
+                $lossProfitClean = $lossProfitOperational + $cashSummary;
 
                 $cashActual = 0;
                 for ($i=0; $i < count($cashBookJson); $i++) { 
@@ -305,6 +321,12 @@ class OrderController extends Controller
                 'cash_summary' => $cashSummary,
                 'cash_profit' => $cashProfit,
                 'cash_actual' => $cashActual,
+                'cash_flow' => $cashFlow,
+                'cash_ending' => $cashEnding,
+                'discount_order' => $discountOrder,
+                'loss_profit' => $lossProfit,
+                'loss_profit_operational' => $lossProfitOperational,
+                'loss_profit_clean' => $lossProfitClean,
                 'expense_list' => $expenseListPayload,
                 'expense_list_total' => $expenseListTotal,
                 'expense_list_item' => $expenseListItem,
