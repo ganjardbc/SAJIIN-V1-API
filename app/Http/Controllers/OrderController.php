@@ -172,7 +172,7 @@ class OrderController extends Controller
                 $cashFlow = $grandTotal - $expenseListTotal;
                 $cashEnding = $cashModal + $cashFlow;
                 $cashProfit = $cashSummary - $cashModal;
-                $lossProfit = $cashOutOrder - $discountOrder;
+                $lossProfit = $cashIn - $discountOrder;
                 $lossProfitOperational = $lossProfit + $cashOut;
                 $lossProfitClean = $lossProfitOperational + $cashSummary;
             }
