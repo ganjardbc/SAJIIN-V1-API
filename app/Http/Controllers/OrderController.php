@@ -331,7 +331,8 @@ class OrderController extends Controller
                 'expense_list_total' => $expenseListTotal,
                 'expense_list_item' => $expenseListItem,
                 'range_date' => $rangeDate,
-                'cashBook' => $cashBook
+                'cashBook' => $cashBook,
+                'user' => Auth()->user(),
             ];
         }
 
@@ -474,6 +475,9 @@ class OrderController extends Controller
             $cashOutOrder = Order::where($newStatus)
                 ->where('status', '!=', 'canceled')
                 ->sum('change_price');
+            $discountOrder = Order::where($newStatus)
+                ->where('status', '!=', 'canceled')
+                ->sum('discount_price');
             
             // EXPENSE LIST
             $expenseList = ExpenseList::where(array_merge($cashbookStatus, ['shop_id' => $shopID]))
@@ -492,7 +496,12 @@ class OrderController extends Controller
             $cashModal = $cashBook['cash_modal'];
             $cashActual = $cashBook['cash_actual'];
             $cashSummary = ($cashModal + $cashIn) - $cashOut;
+            $cashFlow = $grandTotal - $expenseListTotal;
+            $cashEnding = $cashModal + $cashFlow;
             $cashProfit = $cashSummary - $cashModal;
+            $lossProfit = $cashIn - $discountOrder;
+            $lossProfitOperational = abs($lossProfit - $cashOut);
+            $lossProfitClean = $lossProfitOperational + $cashSummary;
         }
         else 
         {
@@ -535,6 +544,9 @@ class OrderController extends Controller
             $cashOutOrder = Order::where($newStatus)
                 ->whereIn('cashbook_id', $cashBookIds)
                 ->sum('change_price');
+            $discountOrder = Order::where($newStatus)
+                ->whereIn('cashbook_id', $cashBookIds)
+                ->sum('discount_price');
             
             // EXPENSE LIST
             $expenseList = ExpenseList::where($newExpenseStatus)
@@ -558,6 +570,11 @@ class OrderController extends Controller
 
             $cashSummary = ($cashModal + $cashIn) - $cashOut;
             $cashProfit = $cashSummary - $cashModal;
+            $cashFlow = $grandTotal - $expenseListTotal;
+            $cashEnding = $cashModal + $cashFlow;
+            $lossProfit = $cashIn - $discountOrder;
+            $lossProfitOperational = abs($lossProfit - $cashOut);
+            $lossProfitClean = $lossProfitOperational + $cashSummary;
 
             $cashActual = 0;
             for ($i=0; $i < count($cashBookJson); $i++) { 
@@ -631,8 +648,14 @@ class OrderController extends Controller
             'cash_out' => $cashOut,
             'cash_modal' => $cashModal,
             'cash_summary' => $cashSummary,
-            'cash_actual' => $cashActual,
             'cash_profit' => $cashProfit,
+            'cash_actual' => $cashActual,
+            'cash_flow' => $cashFlow,
+            'cash_ending' => $cashEnding,
+            'discount_order' => $discountOrder,
+            'loss_profit' => $lossProfit,
+            'loss_profit_operational' => $lossProfitOperational,
+            'loss_profit_clean' => $lossProfitClean,
             'expense_list' => $expenseListPayload,
             'expense_list_total' => $expenseListTotal,
             'expense_list_item' => $expenseListItem,
@@ -640,11 +663,22 @@ class OrderController extends Controller
             'cashBook' => $cashBook,
             'range_date' => $rangeDate,
             'start_date' => $startDate,
-            'end_date' => $endDate
+            'end_date' => $endDate,
+            'user' => Auth()->user(),
         ];
 
-        $pdf = PDF::loadview('reports.order', ['response' => $response]);
-        return $pdf->download('order-reports');
+        if ($req['download_type'] == 'profit-and-loss') {
+            $pdf = PDF::loadview('reports.profitAndLoss', ['response' => $response]);
+            return $pdf->download('profit-and-loss');
+        }
+        else if ($req['download_type'] == 'cash-flows') {
+            $pdf = PDF::loadview('reports.cashFlows', ['response' => $response]);
+            return $pdf->download('cash-flows');
+        } 
+        else {
+            $pdf = PDF::loadview('reports.order', ['response' => $response]);
+            return $pdf->download('order-reports');
+        }
     }
 
     public function getAll(Request $req)

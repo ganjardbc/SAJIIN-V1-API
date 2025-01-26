@@ -64,12 +64,12 @@
     <div id="container">
         <div style="padding-bottom: 15px;">
             <h1 style="font-size: 16px; text-align: center;">Laporan Keuangan</h1>
-            <p style="text-align: center;">{{ date('d M Y') }}</p>
+            <p style="text-align: center;">PERIODE: {{ date_format(date_create($response['range_date'][0]), 'd M Y') }} - {{ date_format(date_create($response['range_date'][1]), 'd M Y') }}</p>
             <table style="width: 100%;">
                 <tr style="width: 100%;">
                     <td style="width: 50%;">
-                        <h2 style="font-size: 22px; text-align: left;">{{ $response['shop'] ? $response['shop']['name'] : '-' }}</h2>
-                        Periode: {{ date_format(date_create($response['range_date'][0]), 'd M Y') }} - {{ date_format(date_create($response['range_date'][1]), 'd M Y') }}
+                        <h2 style="font-size: 16px; text-align: left;">{{ $response['shop'] ? $response['shop']['name'] : '-' }}</h2>
+                        Dibuat: {{ $response['user']['name'] }}, Tanggal: {{ date('d M Y') }}
                     </td>
                     <td style="width: 50%; text-align: right;">
                         @if($response['shop'] && $response['shop']['image'])
