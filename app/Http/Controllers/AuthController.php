@@ -206,12 +206,12 @@ class AuthController extends Controller
 
         if ($validator->fails()) 
         {
-            $response = [
+            return response()->json([
                 'message' => $validator->errors(),
-                'status' => 'invalide',
-                'code' => '201',
+                'status' => 'Unauthorized',
+                'code' => '401',
                 'data' => []
-            ];
+            ], 401);
         } 
         else 
         {
@@ -237,7 +237,7 @@ class AuthController extends Controller
                         $position = Position::where(['id' => $employee->position_id])->first();
                     }
 
-                    $response = [
+                    return response()->json([
                         'message' => 'login success',
                         'status' => 'ok',
                         'code' => '201',
@@ -250,30 +250,28 @@ class AuthController extends Controller
                             'employee' => $employee,
                             'position' => $position
                         ]
-                    ];
+                    ], 200);
                 }
                 else 
                 {
-                    $response = [
-                        'message' => 'Password is incorrect',
-                        'status' => 'password-invalid',
-                        'code' => '201',
+                    return response()->json([
+                        'message' => 'Invalid credentials',
+                        'status' => 'Unauthorized',
+                        'code' => '401',
                         'data' => []
-                    ];
+                    ], 401);
                 }
-            }
-            else 
-            {
-                $response = [
-                    'message' => 'Username is incorrect',
-                    'status' => 'username-invalid',
-                    'code' => '201',
+            } else 
+{
+                return response()->json([
+                    'message' => 'Invalid credentials',
+                    'status' => 'Unauthorized',
+                    'code' => '401',
                     'data' => []
-                ];
+                ], 401);
             }
-        }
 
-        return response()->json($response, 200);
+        }
     }
 
     public function register(Request $req)
