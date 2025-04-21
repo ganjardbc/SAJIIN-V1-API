@@ -18,91 +18,75 @@ class ShiftController extends Controller
 
     public function getAll(Request $req)
     {
-        $validator = Validator::make($req->all(), [
-            'limit' => 'required|integer',
-            'offset' => 'required|integer'
-        ]);
-
         $response = [];
+        $search = $req['search'];
+        $limit = $req['limit'];
+        $offset = $req['offset'];
+        $status = $req['status'] ? ['status' => $req['status']] : [];
+        $newStatus = array_merge(
+            $status,
+            ['shop_id' => $req['shop_id']]
+        );
+        $totalRecord = 0;
 
-        if ($validator->fails()) 
+        $base = Shift::where($newStatus)
+            ->where(function ($query) use ($search) {
+                $query->where('shift_id', 'LIKE', '%'.$search.'%')
+                    ->orWhere('title', 'LIKE', '%'.$search.'%')
+                    ->orWhere('start_time', 'LIKE', '%'.$search.'%')
+                    ->orWhere('end_time', 'LIKE', '%'.$search.'%')
+                    ->orWhere('description', 'LIKE', '%'.$search.'%');
+            })
+            ->orderBy('id', 'desc');
+        if ($limit && $offset) 
         {
+            $data = $base->limit($limit)->offset($offset)->get();
+        }
+        else 
+        {
+            $data = $base->get();
+        }
+        $totalRecord = Shift::where($newStatus)
+            ->where(function ($query) use ($search) {
+                $query->where('shift_id', 'LIKE', '%'.$search.'%')
+                    ->orWhere('title', 'LIKE', '%'.$search.'%')
+                    ->orWhere('start_time', 'LIKE', '%'.$search.'%')
+                    ->orWhere('end_time', 'LIKE', '%'.$search.'%')
+                    ->orWhere('description', 'LIKE', '%'.$search.'%');
+            })
+            ->count();            
+        if ($data) 
+        {
+            $newPayload = array();
+
+            $dump = json_decode($data, true);                
+            for ($i=0; $i < count($dump); $i++) { 
+                $shift = $dump[$i];
+                $shop = Shop::where('id', $shift['shop_id'])->first();
+                $payload = [
+                    'shift' => $shift,
+                    'shop' => $shop
+                ];
+                array_push($newPayload, $payload);
+            }
+
             $response = [
-                'message' => $validator->errors(),
-                'status' => 'invalide',
+                'message' => 'proceed success',
+                'status' => 'ok',
                 'code' => '201',
-                'data' => []
+                'data' => $newPayload,
+                'total_record' => $totalRecord
             ];
         } 
         else 
         {
-            $search = $req['search'];
-            $limit = $req['limit'];
-            $offset = $req['offset'];
-            $status = $req['status'] ? ['status' => $req['status']] : [];
-            $data = [];
-            $totalRecord = 0;
-
-            $newStt = $status;
-            if ($req['shop_id']) {
-                $newStt = array_merge($status, ['shop_id' => $req['shop_id']]);
-            }
-            $data = Shift::where($newStt)
-                ->where(function ($query) use ($search) {
-                    $query->where('shift_id', 'LIKE', '%'.$search.'%')
-                        ->orWhere('title', 'LIKE', '%'.$search.'%')
-                        ->orWhere('start_time', 'LIKE', '%'.$search.'%')
-                        ->orWhere('end_time', 'LIKE', '%'.$search.'%')
-                        ->orWhere('description', 'LIKE', '%'.$search.'%');
-                })
-                ->limit($limit)
-                ->offset($offset)
-                ->orderBy('id', 'desc')
-                ->get();
-            $totalRecord = Shift::where($newStt)
-                ->where(function ($query) use ($search) {
-                    $query->where('shift_id', 'LIKE', '%'.$search.'%')
-                        ->orWhere('title', 'LIKE', '%'.$search.'%')
-                        ->orWhere('start_time', 'LIKE', '%'.$search.'%')
-                        ->orWhere('end_time', 'LIKE', '%'.$search.'%')
-                        ->orWhere('description', 'LIKE', '%'.$search.'%');
-                })
-                ->count();
-            
-            if ($data) 
-            {
-                $newPayload = array();
-
-                $dump = json_decode($data, true);
-                
-                for ($i=0; $i < count($dump); $i++) { 
-                    $shift = $dump[$i];
-                    $shop = Shop::where('id', $shift['shop_id'])->first();
-                    $payload = [
-                        'shift' => $shift,
-                        'shop' => $shop
-                    ];
-                    array_push($newPayload, $payload);
-                }
-
-                $response = [
-                    'message' => 'proceed success',
-                    'status' => 'ok',
-                    'code' => '201',
-                    'data' => $newPayload,
-                    'total_record' => $totalRecord
-                ];
-            } 
-            else 
-            {
-                $response = [
-                    'message' => 'failed to get datas',
-                    'status' => 'failed',
-                    'code' => '201',
-                    'data' => [],
-                    'total_record' => $totalRecord
-                ];
-            }
+            $response = [
+                'message' => 'failed to get datas',
+                'status' => 'failed',
+                'code' => '201',
+                'data' => [],
+                'total_record' => $totalRecord
+            ];
         }
 
         return response()->json($response, 200);
@@ -293,7 +277,6 @@ class ShiftController extends Controller
         $validator = Validator::make($req->all(), [
             'shift_id' => 'required|string|min:0|max:17|unique:shifts',
             'title' => 'required|string',
-            'description' => 'required|string',
             'start_time' => 'required|string',
             'end_time' => 'required|string',
             'status' => 'required|string',
@@ -355,7 +338,6 @@ class ShiftController extends Controller
         $validator = Validator::make($req->all(), [
             'shift_id' => 'required|string|min:0|max:17',
             'title' => 'required|string',
-            'description' => 'required|string',
             'start_time' => 'required|string',
             'end_time' => 'required|string',
             'status' => 'required|string',
