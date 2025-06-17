@@ -6,7 +6,6 @@ use Illuminate\Http\Request;
 use App\User;
 use App\RolePermission;
 use App\Role;
-use App\Shop;
 use App\Employee;
 use App\Position;
 use Laravel\Sanctum\NewAccessToken;
@@ -19,6 +18,7 @@ class AuthController extends Controller
     {
         $this->middleware('auth:sanctum', [
         	'except' => [
+                'me',
         		'login', 
                 'loginUsername',
         		'register'
@@ -147,14 +147,9 @@ class AuthController extends Controller
                     $permission = RolePermission::GetAllSmallByID(1000, 0, $data['role_id']);
                     $role = Role::where(['id' => $data['role_id']])->first();
                     $employee = null;
-                    $shop = null;
 
                     if ($user->owner_id) {
                         $employee = Employee::where(['id' => $user->owner_id])->first();
-                    }
-                    
-                    if ($employee) {
-                        $shop = Shop::where(['id' => $employee->shop_id])->first();
                     }
 
                     $response = [
@@ -166,7 +161,6 @@ class AuthController extends Controller
                             'role' => $role,
                             'permissions' => $permission,
                             'token' => $user->createToken('my-token')->plainTextToken,
-                            'shop' => $shop,
                             'employee' => $employee
                         ]
                     ];
@@ -226,15 +220,9 @@ class AuthController extends Controller
                     $role = Role::where(['id' => $data['role_id']])->first();
                     $employee = null;
                     $position = null;
-                    $shop = null;
 
-                    if ($user->owner_id) {
-                        $employee = Employee::where(['id' => $user->owner_id])->first();
-                    }
-                    
-                    if ($employee) {
-                        $shop = Shop::where(['id' => $employee->shop_id])->first();
-                        $position = Position::where(['id' => $employee->position_id])->first();
+                    if ($data->owner_id) {
+                        $employee = Employee::where(['id' => $data->owner_id])->first();
                     }
 
                     $response = [
@@ -246,7 +234,6 @@ class AuthController extends Controller
                             'role' => $role,
                             'permissions' => $permission,
                             'token' => $user->createToken('my-token')->plainTextToken,
-                            'shop' => $shop,
                             'employee' => $employee,
                             'position' => $position
                         ]
@@ -315,14 +302,9 @@ class AuthController extends Controller
                 $permission = RolePermission::GetAllSmallByID(1000, 0, $data['role_id']);
                 $role = Role::where(['id' => $data['role_id']])->first();
                 $employee = null;
-                $shop = null;
 
                 if ($data->owner_id) {
                     $employee = Employee::where(['id' => $data->owner_id])->first();
-                }
-                
-                if ($employee) {
-                    $shop = Shop::where(['id' => $employee->shop_id])->first();
                 }
 
                 $response = [
@@ -334,7 +316,6 @@ class AuthController extends Controller
                         'role' => $role,
                         'permissions' => $permission,
                         'token' => $data->createToken('my-token')->plainTextToken,
-                        'shop' => $shop,
                         'employee' => $employee
                     ]
                 ];
@@ -374,14 +355,14 @@ class AuthController extends Controller
         $permission = RolePermission::GetAllSmallByID(1000, 0, $data['role_id']);
         $role = Role::where(['id' => $data['role_id']])->first();
         $employee = null;
-        $shop = null;
+        $position = null;
 
         if ($user->owner_id) {
             $employee = Employee::where(['id' => $user->owner_id])->first();
         }
 
         if ($employee) {
-            $shop = Shop::where(['id' => $employee->shop_id])->first();
+            $position = Position::where(['id' => $employee->position_id])->first();
         }
 
         $response = [
@@ -392,8 +373,8 @@ class AuthController extends Controller
                 'user' => $data,
                 'role' => $role,
                 'permissions' => $permission,
-                'shop' => $shop,
-                'employee' => $employee
+                'employee' => $employee,
+                'position' => $position
             ]
         ];
      

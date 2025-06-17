@@ -707,7 +707,7 @@ class OrderController extends Controller
             $limit = $req['limit'];
             $offset = $req['offset'];
             $totalRecord = 0;
-            $status = $req['status'] ? ['status' => $req['status']] : [['status', '!=', 'canceled']];
+            $status = $req['status'] ? ['status' => $req['status']] : [['status', '!=', 'canceled'], ['status', '!=', 'done']];
             $paymentStatus = $req['payment_status'] == '0' || $req['payment_status'] == '1' ? ['payment_status' => $req['payment_status']] : [];
             $cashbookStatus = $req['cashbook_id'] ? ['cashbook_id' => $req['cashbook_id']] : [];
             $newStatus = array_merge($status, $paymentStatus, $cashbookStatus, ['shop_id' => $shopID]);

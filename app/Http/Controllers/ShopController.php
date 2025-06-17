@@ -46,7 +46,15 @@ class ShopController extends Controller
             $limit = $req['limit'];
             $offset = $req['offset'];
             $status = $req['status'] ? ['status' => $req['status']] : [];
+            
             $user = $req['role'] !== 'admin' ? ['user_id' => Auth()->user()->id] : [];
+            $employee = null;
+
+            if (Auth()->user()->owner_id) {
+                $employee = Employee::where(['id' => Auth()->user()->owner_id])->first();
+                $user = $employee ? ['id' => $employee->shop_id] : [];
+            }
+
             $newStt = array_merge($status, $user);
             $totalRecord = 0;
 
@@ -154,23 +162,11 @@ class ShopController extends Controller
             
             if ($data) 
             {
-                $catalogs = Catalog::GetAllByShopID(10, 0, $data['id']);
-                $tables = Table::where(['shop_id' => $data['id']])->get();
-                $shifts = Shift::where(['shop_id' => $data['id']])->get();
-                $customers = Customer::where(['shop_id' => $data['id']])->get();
-                $newPayload = [
-                    'shop' => $data,
-                    'catalogs' => $catalogs,
-                    'tables' => $tables,
-                    'shifts' => $shifts,
-                    'customers' => $customers
-                ];
-
                 $response = [
                     'message' => 'proceed success',
                     'status' => 'ok',
                     'code' => '201',
-                    'data' => $newPayload
+                    'data' => $data
                 ];
             } 
             else 
