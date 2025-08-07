@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Str;
 use App\Product;
 use App\ProductDetail;
 use App\ProductImage;
@@ -356,13 +357,28 @@ class ProductController extends Controller
                 $newPayloadItems = [];
                 $payloadItems = $req['details'];
 
-                $dump = $payloadItems;
+                // Check if payloadItems is empty, if so, use main product data
+                if (empty($payloadItems)) {
+                    $newPayloadItems[] = [
+                        'product_id' => $dataProduct['id'],
+                        'proddetail_id' => (string) Str::uuid(),
+                        'name' => $payload['name'],
+                        'description' => $payload['description'],
+                        'price' => $payload['price'],
+                        'is_available' => $payload['is_available'],
+                        'status' => $payload['status'],
+                        'created_by' => Auth()->user()->id,
+                        'created_at' => date('Y-m-d H:i:s')
+                    ];
+                } else {
+                    $dump = $payloadItems;
 
-                for ($i=0; $i < count($dump); $i++) { 
-                    $dump[$i]['product_id'] = $dataProduct['id'];
-                    $dump[$i]['created_by'] = Auth()->user()->id;
-                    $dump[$i]['created_at'] = date('Y-m-d H:i:s');
-                    array_push($newPayloadItems, $dump[$i]);
+                    for ($i=0; $i < count($dump); $i++) { 
+                        $dump[$i]['product_id'] = $dataProduct['id'];
+                        $dump[$i]['created_by'] = Auth()->user()->id;
+                        $dump[$i]['created_at'] = date('Y-m-d H:i:s');
+                        array_push($newPayloadItems, $dump[$i]);
+                    }
                 }
 
                 $item = ProductDetail::insert($newPayloadItems);
@@ -445,16 +461,32 @@ class ProductController extends Controller
                 $newPayloadItems = [];
                 $payloadItems = $req['details'];
 
-                $dump = $payloadItems;
+                // Check if payloadItems is empty, if so, use main product data
+                if (empty($payloadItems)) {
+                    $newPayloadItems[] = [
+                        'product_id' => $dataProduct['id'],
+                        'name' => $payload['name'],
+                        'description' => $payload['description'],
+                        'price' => $payload['price'],
+                        'is_available' => $payload['is_available'],
+                        'status' => $payload['status'],
+                        'created_by' => Auth()->user()->id,
+                        'created_at' => date('Y-m-d H:i:s'),
+                        'updated_by' => Auth()->user()->id,
+                        'updated_at' => date('Y-m-d H:i:s')
+                    ];
+                } else {
+                    $dump = $payloadItems;
 
-                for ($i=0; $i < count($dump); $i++) { 
-                    $dump[$i]['product_id'] = $dataProduct['id'];
-                    $dump[$i]['created_by'] = Auth()->user()->id;
-                    $dump[$i]['created_at'] = date('Y-m-d H:i:s');
-                    $dump[$i]['updated_by'] = Auth()->user()->id;
-                    $dump[$i]['updated_at'] = date('Y-m-d H:i:s');
-                    unset($dump[$i]['id']);
-                    array_push($newPayloadItems, $dump[$i]);
+                    for ($i=0; $i < count($dump); $i++) { 
+                        $dump[$i]['product_id'] = $dataProduct['id'];
+                        $dump[$i]['created_by'] = Auth()->user()->id;
+                        $dump[$i]['created_at'] = date('Y-m-d H:i:s');
+                        $dump[$i]['updated_by'] = Auth()->user()->id;
+                        $dump[$i]['updated_at'] = date('Y-m-d H:i:s');
+                        unset($dump[$i]['id']);
+                        array_push($newPayloadItems, $dump[$i]);
+                    }
                 }
 
                 ProductDetail::where(['product_id' => $dataProduct['id']])->delete();
