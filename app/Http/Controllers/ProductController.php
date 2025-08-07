@@ -465,7 +465,6 @@ class ProductController extends Controller
                 if (empty($payloadItems)) {
                     $newPayloadItems[] = [
                         'product_id' => $dataProduct['id'],
-                        'proddetail_id' => \Illuminate\Support\Str::uuid(),
                         'name' => $payload['name'],
                         'description' => $payload['description'],
                         'price' => $payload['price'],
