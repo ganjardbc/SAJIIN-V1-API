@@ -1,0 +1,7 @@
+CREATE TABLE z_log_orders (
+    id SERIAL PRIMARY KEY,
+    time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    log TEXT NOT NULL,
+    shop_id BIGINT,
+    user_id BIGINT
+);
