@@ -18,91 +18,73 @@ class ShiftController extends Controller
 
     public function getAll(Request $req)
     {
-        $validator = Validator::make($req->all(), [
-            'limit' => 'required|integer',
-            'offset' => 'required|integer'
-        ]);
-
         $response = [];
+        $search = $req['search'];
+        $limit = $req['limit'];
+        $offset = $req['offset'];
+        $status = $req['status'] ? ['status' => $req['status']] : [];
+        $shopId = $req['shop_id'] ? ['shop_id' => $req['shop_id']] : [];
+        $newStatus = array_merge($status, $shopId);
+        $totalRecord = 0;
 
-        if ($validator->fails()) 
+        $base = Shift::where($newStatus)
+            ->where(function ($query) use ($search) {
+                $query->where('shift_id', 'LIKE', '%'.$search.'%')
+                    ->orWhere('title', 'LIKE', '%'.$search.'%')
+                    ->orWhere('start_time', 'LIKE', '%'.$search.'%')
+                    ->orWhere('end_time', 'LIKE', '%'.$search.'%')
+                    ->orWhere('description', 'LIKE', '%'.$search.'%');
+            })
+            ->orderBy('id', 'desc');
+        if ($limit && $offset)
+        {
+            $data = $base->limit($limit)->offset($offset)->get();
+        }
+        else
+        {
+            $data = $base->get();
+        }
+        $totalRecord = Shift::where($newStatus)
+            ->where(function ($query) use ($search) {
+                $query->where('shift_id', 'LIKE', '%'.$search.'%')
+                    ->orWhere('title', 'LIKE', '%'.$search.'%')
+                    ->orWhere('start_time', 'LIKE', '%'.$search.'%')
+                    ->orWhere('end_time', 'LIKE', '%'.$search.'%')
+                    ->orWhere('description', 'LIKE', '%'.$search.'%');
+            })
+            ->count();
+        if ($data)
+        {
+            $newPayload = array();
+
+            $dump = json_decode($data, true);
+            for ($i=0; $i < count($dump); $i++) {
+                $shift = $dump[$i];
+                $shop = Shop::where('id', $shift['shop_id'])->first();
+                $payload = [
+                    'shift' => $shift,
+                    'shop' => $shop
+                ];
+                array_push($newPayload, $payload);
+            }
+
+            $response = [
+                'message' => 'proceed success',
+                'status' => 'ok',
+                'code' => '201',
+                'data' => $newPayload,
+                'total_record' => $totalRecord
+            ];
+        }
+        else
         {
             $response = [
-                'message' => $validator->errors(),
-                'status' => 'invalide',
+                'message' => 'failed to get datas',
+                'status' => 'failed',
                 'code' => '201',
-                'data' => []
+                'data' => [],
+                'total_record' => $totalRecord
             ];
-        } 
-        else 
-        {
-            $search = $req['search'];
-            $limit = $req['limit'];
-            $offset = $req['offset'];
-            $status = $req['status'] ? ['status' => $req['status']] : [];
-            $data = [];
-            $totalRecord = 0;
-
-            $newStt = $status;
-            if ($req['shop_id']) {
-                $newStt = array_merge($status, ['shop_id' => $req['shop_id']]);
-            }
-            $data = Shift::where($newStt)
-                ->where(function ($query) use ($search) {
-                    $query->where('shift_id', 'LIKE', '%'.$search.'%')
-                        ->orWhere('title', 'LIKE', '%'.$search.'%')
-                        ->orWhere('start_time', 'LIKE', '%'.$search.'%')
-                        ->orWhere('end_time', 'LIKE', '%'.$search.'%')
-                        ->orWhere('description', 'LIKE', '%'.$search.'%');
-                })
-                ->limit($limit)
-                ->offset($offset)
-                ->orderBy('id', 'desc')
-                ->get();
-            $totalRecord = Shift::where($newStt)
-                ->where(function ($query) use ($search) {
-                    $query->where('shift_id', 'LIKE', '%'.$search.'%')
-                        ->orWhere('title', 'LIKE', '%'.$search.'%')
-                        ->orWhere('start_time', 'LIKE', '%'.$search.'%')
-                        ->orWhere('end_time', 'LIKE', '%'.$search.'%')
-                        ->orWhere('description', 'LIKE', '%'.$search.'%');
-                })
-                ->count();
-            
-            if ($data) 
-            {
-                $newPayload = array();
-
-                $dump = json_decode($data, true);
-                
-                for ($i=0; $i < count($dump); $i++) { 
-                    $shift = $dump[$i];
-                    $shop = Shop::where('id', $shift['shop_id'])->first();
-                    $payload = [
-                        'shift' => $shift,
-                        'shop' => $shop
-                    ];
-                    array_push($newPayload, $payload);
-                }
-
-                $response = [
-                    'message' => 'proceed success',
-                    'status' => 'ok',
-                    'code' => '201',
-                    'data' => $newPayload,
-                    'total_record' => $totalRecord
-                ];
-            } 
-            else 
-            {
-                $response = [
-                    'message' => 'failed to get datas',
-                    'status' => 'failed',
-                    'code' => '201',
-                    'data' => [],
-                    'total_record' => $totalRecord
-                ];
-            }
         }
 
         return response()->json($response, 200);
@@ -116,7 +98,7 @@ class ShiftController extends Controller
 
         $response = [];
 
-        if ($validator->fails()) 
+        if ($validator->fails())
         {
             $response = [
                 'message' => $validator->errors(),
@@ -124,13 +106,13 @@ class ShiftController extends Controller
                 'code' => '201',
                 'data' => []
             ];
-        } 
-        else 
+        }
+        else
         {
             $shift_id = $req['shift_id'];
             $data = Shift::where(['shift_id' => $shift_id])->first();
-            
-            if ($data) 
+
+            if ($data)
             {
                 $response = [
                     'message' => 'proceed success',
@@ -138,8 +120,8 @@ class ShiftController extends Controller
                     'code' => '201',
                     'data' => $data
                 ];
-            } 
-            else 
+            }
+            else
             {
                 $response = [
                     'message' => 'failed to get datas',
@@ -153,15 +135,15 @@ class ShiftController extends Controller
         return response()->json($response, 200);
     }
 
-    public function removeImage(Request $req) 
+    public function removeImage(Request $req)
     {
         $validator = Validator::make($req->all(), [
             'shift_id' => 'required|string|min:0|max:17',
         ]);
-        
+
         $response = [];
 
-        if ($validator->fails()) 
+        if ($validator->fails())
         {
             $response = [
                 'message' => $validator->errors(),
@@ -169,8 +151,8 @@ class ShiftController extends Controller
                 'code' => '201',
                 'data' => []
             ];
-        } 
-        else 
+        }
+        else
         {
             $payload = [
                 'image' => '',
@@ -193,7 +175,7 @@ class ShiftController extends Controller
                     'data' => Shift::where(['shift_id' => $req['shift_id']])->first()
                 ];
             }
-            else 
+            else
             {
                 $response = [
                     'message' => 'failed to remove image',
@@ -205,7 +187,7 @@ class ShiftController extends Controller
         }
     }
 
-    public function uploadImage(Request $req) 
+    public function uploadImage(Request $req)
     {
         $validator = Validator::make($req->all(), [
             'shift_id' => 'required|string|min:0|max:17',
@@ -214,7 +196,7 @@ class ShiftController extends Controller
 
         $response = [];
 
-        if ($validator->fails()) 
+        if ($validator->fails())
         {
             $response = [
                 'message' => $validator->errors(),
@@ -222,8 +204,8 @@ class ShiftController extends Controller
                 'code' => '201',
                 'data' => []
             ];
-        } 
-        else 
+        }
+        else
         {
             $id = $req['shift_id'];
             $image = $req['image'];
@@ -239,22 +221,22 @@ class ShiftController extends Controller
 			$img = Image::make($image->getRealPath());
 			$thumbnail = $img->resize(400, 400, function ($constraint) {
 					$constraint->aspectRatio();
-				})->save($destination); 
+				})->save($destination);
 
 			//saving image real to server
 			$destination = public_path('contents/payments/covers/');
 			$real = $image->move($destination, $filename);
 
-            if ($thumbnail && $real) 
+            if ($thumbnail && $real)
 			{
                 $payload = [
                     'image' => $filename,
                     'updated_by' => Auth()->user()->id,
                     'updated_at' => date('Y-m-d H:i:s')
                 ];
-    
+
                 $data = Shift::where(['shift_id' => $req['shift_id']])->update($payload);
-    
+
                 if ($data)
                 {
                     $response = [
@@ -264,7 +246,7 @@ class ShiftController extends Controller
                         'data' => Shift::where(['shift_id' => $req['shift_id']])->first()
                     ];
                 }
-                else 
+                else
                 {
                     $response = [
                         'message' => 'failed to save',
@@ -274,7 +256,7 @@ class ShiftController extends Controller
                     ];
                 }
             }
-            else 
+            else
             {
                 $response = [
                     'message' => 'failed to upload image',
@@ -293,7 +275,6 @@ class ShiftController extends Controller
         $validator = Validator::make($req->all(), [
             'shift_id' => 'required|string|min:0|max:17|unique:shifts',
             'title' => 'required|string',
-            'description' => 'required|string',
             'start_time' => 'required|string',
             'end_time' => 'required|string',
             'status' => 'required|string',
@@ -302,7 +283,7 @@ class ShiftController extends Controller
 
         $response = [];
 
-        if ($validator->fails()) 
+        if ($validator->fails())
         {
             $response = [
                 'message' => $validator->errors(),
@@ -310,8 +291,8 @@ class ShiftController extends Controller
                 'code' => '201',
                 'data' => []
             ];
-        } 
-        else 
+        }
+        else
         {
             $payload = [
                 'shift_id' => $req['shift_id'],
@@ -336,7 +317,7 @@ class ShiftController extends Controller
                     'data' => Shift::where(['shift_id' => $req['shift_id']])->first()
                 ];
             }
-            else 
+            else
             {
                 $response = [
                     'message' => 'failed to save',
@@ -355,7 +336,6 @@ class ShiftController extends Controller
         $validator = Validator::make($req->all(), [
             'shift_id' => 'required|string|min:0|max:17',
             'title' => 'required|string',
-            'description' => 'required|string',
             'start_time' => 'required|string',
             'end_time' => 'required|string',
             'status' => 'required|string',
@@ -364,7 +344,7 @@ class ShiftController extends Controller
 
         $response = [];
 
-        if ($validator->fails()) 
+        if ($validator->fails())
         {
             $response = [
                 'message' => $validator->errors(),
@@ -372,8 +352,8 @@ class ShiftController extends Controller
                 'code' => '201',
                 'data' => []
             ];
-        } 
-        else 
+        }
+        else
         {
             $payload = [
                 'title' => $req['title'],
@@ -397,7 +377,7 @@ class ShiftController extends Controller
                     'data' => Shift::where(['shift_id' => $req['shift_id']])->first()
                 ];
             }
-            else 
+            else
             {
                 $response = [
                     'message' => 'failed to save',
@@ -419,7 +399,7 @@ class ShiftController extends Controller
 
         $response = [];
 
-        if ($validator->fails()) 
+        if ($validator->fails())
         {
             $response = [
                 'message' => $validator->errors(),
@@ -427,8 +407,8 @@ class ShiftController extends Controller
                 'code' => '201',
                 'data' => []
             ];
-        } 
-        else 
+        }
+        else
         {
             $data = Shift::where(['shift_id' => $req['shift_id']])->delete();
 
@@ -441,7 +421,7 @@ class ShiftController extends Controller
                     'data' => []
                 ];
             }
-            else 
+            else
             {
                 $response = [
                     'message' => 'failed to delete',
