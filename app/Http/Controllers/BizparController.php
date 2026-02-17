@@ -22,7 +22,7 @@ class BizparController extends Controller
 
         $response = [];
 
-        if ($validator->fails()) 
+        if ($validator->fails())
         {
             $response = [
                 'message' => $validator->errors(),
@@ -30,8 +30,8 @@ class BizparController extends Controller
                 'code' => '201',
                 'data' => []
             ];
-        } 
-        else 
+        }
+        else
         {
             $search = $req['search'];
             $limit = $req['limit'];
@@ -58,8 +58,8 @@ class BizparController extends Controller
                         ->orWhere('description', 'LIKE', '%'.$search.'%');
                 })
                 ->count();
-            
-            if ($data) 
+
+            if ($data)
             {
                 $response = [
                     'message' => 'proceed success',
@@ -68,8 +68,8 @@ class BizparController extends Controller
                     'data' => $data,
                     'total_record' => $totalRecord
                 ];
-            } 
-            else 
+            }
+            else
             {
                 $response = [
                     'message' => 'failed to get datas',
@@ -94,7 +94,7 @@ class BizparController extends Controller
 
         $response = [];
 
-        if ($validator->fails()) 
+        if ($validator->fails())
         {
             $response = [
                 'message' => $validator->errors(),
@@ -102,15 +102,15 @@ class BizparController extends Controller
                 'code' => '201',
                 'data' => []
             ];
-        } 
-        else 
+        }
+        else
         {
             $limit = $req['limit'];
             $offset = $req['offset'];
             $type = $req['type'];
             $data = Bizpar::where(['type' => $type])->limit($limit)->offset($offset)->orderBy('id', 'desc')->get();
-            
-            if ($data) 
+
+            if ($data)
             {
                 $response = [
                     'message' => 'proceed success',
@@ -118,8 +118,8 @@ class BizparController extends Controller
                     'code' => '201',
                     'data' => $data
                 ];
-            } 
-            else 
+            }
+            else
             {
                 $response = [
                     'message' => 'failed to get datas',
@@ -136,12 +136,12 @@ class BizparController extends Controller
     public function getByKey(Request $req)
     {
         $validator = Validator::make($req->all(), [
-            'key' => 'required|string|min:0|max:6',
+            'key' => 'required|string|min:0|max:17',
         ]);
 
         $response = [];
 
-        if ($validator->fails()) 
+        if ($validator->fails())
         {
             $response = [
                 'message' => $validator->errors(),
@@ -149,13 +149,13 @@ class BizparController extends Controller
                 'code' => '201',
                 'data' => []
             ];
-        } 
-        else 
+        }
+        else
         {
             $key = $req['key'];
             $data = Bizpar::where(['key' => $key])->first();
-            
-            if ($data) 
+
+            if ($data)
             {
                 $response = [
                     'message' => 'proceed success',
@@ -163,8 +163,8 @@ class BizparController extends Controller
                     'code' => '201',
                     'data' => $data
                 ];
-            } 
-            else 
+            }
+            else
             {
                 $response = [
                     'message' => 'failed to get datas',
@@ -188,7 +188,7 @@ class BizparController extends Controller
 
         $response = [];
 
-        if ($validator->fails()) 
+        if ($validator->fails())
         {
             $response = [
                 'message' => $validator->errors(),
@@ -196,8 +196,8 @@ class BizparController extends Controller
                 'code' => '201',
                 'data' => []
             ];
-        } 
-        else 
+        }
+        else
         {
             $payload = [
                 'key' => $req['key'],
@@ -219,7 +219,7 @@ class BizparController extends Controller
                     'data' => Bizpar::where(['key' => $req['key']])->first()
                 ];
             }
-            else 
+            else
             {
                 $response = [
                     'message' => 'failed to save',
@@ -243,7 +243,7 @@ class BizparController extends Controller
 
         $response = [];
 
-        if ($validator->fails()) 
+        if ($validator->fails())
         {
             $response = [
                 'message' => $validator->errors(),
@@ -251,8 +251,8 @@ class BizparController extends Controller
                 'code' => '201',
                 'data' => []
             ];
-        } 
-        else 
+        }
+        else
         {
             $payload = [
                 'value' => $req['value'],
@@ -273,7 +273,7 @@ class BizparController extends Controller
                     'data' => Bizpar::where(['key' => $req['key']])->first()
                 ];
             }
-            else 
+            else
             {
                 $response = [
                     'message' => 'failed to save',
@@ -295,7 +295,7 @@ class BizparController extends Controller
 
         $response = [];
 
-        if ($validator->fails()) 
+        if ($validator->fails())
         {
             $response = [
                 'message' => $validator->errors(),
@@ -303,8 +303,8 @@ class BizparController extends Controller
                 'code' => '201',
                 'data' => []
             ];
-        } 
-        else 
+        }
+        else
         {
             $data = Bizpar::where(['key' => $req['key']])->delete();
 
@@ -317,7 +317,7 @@ class BizparController extends Controller
                     'data' => []
                 ];
             }
-            else 
+            else
             {
                 $response = [
                     'message' => 'failed to delete',
