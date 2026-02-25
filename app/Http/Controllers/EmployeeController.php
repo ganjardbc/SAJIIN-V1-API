@@ -50,6 +50,9 @@ class EmployeeController extends Controller
             if ($req['shop_id']) {
                 $newStt = array_merge($status, ['shop_id' => $req['shop_id']]);
             }
+            if ($req['shift_id']) {
+                $newStt = array_merge($status, ['shift_id' => $req['shift_id']]);
+            }
             $data = Employee::where($newStt)
                 ->where(function ($query) use ($search) {
                     $query->where('employee_id', 'LIKE', '%'.$search.'%')
